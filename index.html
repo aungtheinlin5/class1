@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#f7f7fb">
 <title>ReadHub — Online Book Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
+    color-scheme: light only;
     --primary:#5b4fe8;
     --primary-dark:#4a3fd6;
     --primary-light:#efedfe;
@@ -365,6 +368,201 @@
   .notif-item-title{ font-size:14px; font-weight:800; margin:0 0 4px; color:var(--ink); }
   .notif-item-msg{ font-size:13px; color:var(--muted); margin:0 0 6px; line-height:1.6; }
   .notif-item-time{ font-size:11px; color:var(--muted-light); }
+
+  /* ---------- 2D LIVE PAGE (scoped) ---------- */
+  #page-twodlive{ background:#f2f2f5; min-height:100vh; margin-left:-1px; margin-right:-1px; padding-bottom:74px; }
+  #twodLiveRoot{ font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#1a1a1a; }
+  #twodLiveRoot .live-close-row{ display:flex; justify-content:flex-end; padding:14px 16px 0; }
+  #twodLiveRoot .live-close-btn{
+    width:34px; height:34px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.12);
+    display:flex; align-items:center; justify-content:center; font-size:16px; color:#555; cursor:pointer;
+  }
+  #twodLiveRoot .live-main{
+    background:#fff; margin:6px 16px 16px; border-radius:16px; padding:26px 20px 20px; text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+  }
+  #twodLiveRoot .live-number-big{
+    font-size:6.4em; font-weight:800; color:#3ba24c; text-shadow:1px 2px 0 rgba(0,0,0,0.08);
+    line-height:1; margin:6px 0 4px; transition:all .3s ease; font-family:'Segoe UI', Arial, sans-serif;
+  }
+  #twodLiveRoot .live-number-big.heartbeat{ animation: twod-heartbeat 1s ease-in-out; }
+  @keyframes twod-heartbeat{
+    0%{ transform:scale(1); }
+    15%{ transform:scale(1.15); }
+    30%{ transform:scale(0.95); }
+    45%{ transform:scale(1.1); }
+    60%{ transform:scale(0.98); }
+    75%{ transform:scale(1.05); }
+    100%{ transform:scale(1); }
+  }
+  #twodLiveRoot .live-number-big.glow{ }
+  #twodLiveRoot .live-status{
+    display:flex; align-items:center; justify-content:center; gap:6px; margin:6px 0 0;
+    font-size:0.85em; color:#8a8a8a; font-style:italic;
+  }
+  #twodLiveRoot .live-status .dot{ display:none; }
+  #twodLiveRoot .live-status .refresh-ic{ font-size:1em; }
+  #twodLiveRoot .set-value-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  #twodLiveRoot .sv-box{
+    background:#f5f6fa; border:1px solid #ececef; border-radius:12px; padding:12px; text-align:center;
+  }
+  #twodLiveRoot .sv-box .label{ font-size:0.8em; color:#8a8a8a; font-weight:700; margin-bottom:5px; letter-spacing:0.03em; }
+  #twodLiveRoot .sv-box .value{ font-size:1.25em; font-weight:800; color:#1a237e; }
+  #twodLiveRoot .today-results{ display:flex; flex-direction:column; gap:12px; padding:0 16px; }
+  #twodLiveRoot .time-card{
+    background:#ef4b3d; border-radius:14px; padding:16px 18px; color:#fff;
+    box-shadow:0 2px 8px rgba(239,75,61,0.25);
+  }
+  #twodLiveRoot .time-card .time-label{
+    font-size:1.35em; font-weight:700; text-align:center; margin-bottom:10px; padding-bottom:10px;
+    border-bottom:1px solid rgba(255,255,255,0.3);
+  }
+  #twodLiveRoot .time-card .tc-row{ display:flex; align-items:center; }
+  #twodLiveRoot .time-card .tc-col{ flex:1; text-align:center; }
+  #twodLiveRoot .time-card .tc-col .tc-label{ font-size:0.8em; color:rgba(255,255,255,0.85); margin-bottom:6px; }
+  #twodLiveRoot .time-card .tc-col .tc-value{ font-size:1.15em; font-weight:700; }
+  #twodLiveRoot .time-card .tc-col.tc-2d .tc-value{ color:#ffe14d; font-size:1.3em; }
+  #twodLiveRoot .twod-number{ display:none; }
+  #twodLiveRoot .details{ display:none; }
+  #twodLiveRoot .countdown-section{ text-align:center; padding:16px 20px 4px; }
+  #twodLiveRoot .countdown-label{ font-size:0.85em; color:#8a8a8a; margin-bottom:8px; }
+  #twodLiveRoot .countdown-time{
+    font-size:1.7em; font-weight:bold; color:#1a237e; background:#fff;
+    display:inline-block; padding:8px 26px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  #twodLiveRoot .twod-tab-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:70;
+    display:flex; justify-content:center; align-items:center; gap:0;
+    background:#fff; padding:8px 6px max(8px, env(safe-area-inset-bottom));
+    box-shadow:0 -2px 10px rgba(0,0,0,0.08); border-top:1px solid #ececef;
+  }
+  #twodLiveRoot .twod-tab-item{
+    flex:1; max-width:150px; text-align:center; cursor:pointer; padding:8px 6px; border-radius:12px;
+    transition:all .3s ease; background:transparent;
+  }
+  #twodLiveRoot .twod-tab-item.active{ background:#eef1fb; }
+  #twodLiveRoot .twod-tab-item .tab-icon{ font-size:1.3em; margin-bottom:2px; }
+  #twodLiveRoot .twod-tab-item .tab-label{ font-size:0.78em; color:#8a8a8a; font-weight:500; }
+  #twodLiveRoot .twod-tab-item.active .tab-label{ color:#1a237e; font-weight:bold; }
+  #twodLiveRoot .twod-history-section{ padding:10px 20px 20px; display:none; }
+  #twodLiveRoot .twod-history-section.active{ display:block; }
+  #twodLiveRoot .twod-live-content{ display:block; }
+  #twodLiveRoot .twod-live-content.hidden{ display:none; }
+  #twodLiveRoot .twod-history-table{ width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; }
+  #twodLiveRoot .twod-history-table th{ background:#1565c0; color:#fff; padding:12px 10px; font-size:0.9em; }
+  #twodLiveRoot .twod-history-table td{
+    padding:12px 10px; text-align:center; color:#1a237e; font-weight:bold; border-bottom:1px solid #e0e0e0;
+  }
+  #twodLiveRoot .twod-history-table tr:nth-child(even){ background:#e3f2fd; }
+
+  #twodLiveRoot .twod-gift-section{ padding:10px 12px 20px; display:none; background:#eceff3; margin:0 -20px; }
+  #twodLiveRoot .twod-gift-section.active{ display:block; }
+  #twodLiveRoot .twod-gift-filter-row{ display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:2px; }
+  #twodLiveRoot .twod-gift-filter-row::-webkit-scrollbar{ display:none; }
+  #twodLiveRoot .twod-gift-filter-chip{
+    flex-shrink:0; background:#fff; border:1px solid #d7dce6; color:#5b6472;
+    padding:8px 16px; border-radius:999px; font-size:12.5px; font-weight:700; cursor:pointer; transition:all .15s;
+  }
+  #twodLiveRoot .twod-gift-filter-chip.active{ background:#1a237e; border-color:#1a237e; color:#ffd700; }
+  #twodLiveRoot .twod-gift-list{ display:flex; flex-direction:column; gap:10px; }
+  #twodLiveRoot .twod-gift-loading{
+    display:flex; align-items:center; gap:10px; color:#b3e5fc; font-size:13px; padding:20px 4px;
+  }
+  #twodLiveRoot .twod-gift-empty{ text-align:center; color:#b3e5fc; padding:40px 20px; font-size:13.5px; }
+  #twodLiveRoot .twod-gift-card{
+    background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  }
+  #twodLiveRoot .twod-gift-card-header{
+    display:flex; align-items:center; gap:10px; padding:12px 14px 8px;
+  }
+  #twodLiveRoot .twod-gift-card-avatar{
+    width:40px; height:40px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#e3f2fd;
+  }
+  #twodLiveRoot .twod-gift-card-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  #twodLiveRoot .twod-gift-card-headertext{ display:flex; flex-direction:column; }
+  #twodLiveRoot .twod-gift-card-pagename{ font-size:14px; font-weight:700; color:#050505; }
+  #twodLiveRoot .twod-gift-card-time{ font-size:12px; color:#65676b; }
+  #twodLiveRoot .twod-gift-card-body{ padding:2px 14px 12px; }
+  #twodLiveRoot .twod-gift-card-title{ font-size:15px; font-weight:700; color:#050505; margin-bottom:4px; }
+  #twodLiveRoot .twod-gift-card-desc{ font-size:14.5px; color:#050505; line-height:1.5; white-space:pre-wrap; }
+  #twodLiveRoot .twod-gift-card-img{ width:100%; overflow:hidden; background:#e3f2fd; }
+  #twodLiveRoot .twod-gift-card-img img{ width:100%; height:auto; display:block; }
+  #twodLiveRoot .twod-gift-card{ padding-bottom:10px; }
+  #twodLiveRoot .twod-gift-card-date{ display:none; }
+
+  /* ---- VIP gift card tag + lock ---- */
+  #twodLiveRoot .twod-gift-tag{
+    display:inline-block; font-size:9.5px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+    padding:3px 9px; border-radius:999px; margin-bottom:6px;
+  }
+  #twodLiveRoot .twod-gift-tag.free{ background:#e3f9ee; color:#1fae6e; }
+  #twodLiveRoot .twod-gift-tag.vip{ background:#fff4d6; color:#a8790a; }
+  #twodLiveRoot .twod-gift-vip-joinrow{ padding:10px 14px 2px; }
+  #twodLiveRoot .twod-gift-vip-joinrow button{
+    width:100%; background:linear-gradient(135deg,#ffe9a8,#ffd54a); color:#7a5a00; border:none;
+    padding:10px 16px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit;
+  }
+
+  /* ---- VIP account section (light themed, matches rest of 2D Live) ---- */
+  #twodLiveRoot .twod-vip-section{ padding:16px 4px 20px; display:none; }
+  #twodLiveRoot .twod-vip-section.active{ display:block; }
+  #twodLiveRoot .twod-vip-header{ text-align:center; padding:10px 16px 24px; }
+  #twodLiveRoot .twod-vip-avatar{
+    width:64px; height:64px; border-radius:50%; margin:0 auto 12px;
+    background:linear-gradient(135deg,#ffd700,#c9a227); display:flex; align-items:center; justify-content:center;
+    font-size:26px; font-weight:800; color:#1a237e; box-shadow:0 8px 20px rgba(255,215,0,0.3);
+  }
+  #twodLiveRoot .twod-vip-name{ font-size:17px; font-weight:800; margin:0 0 4px; color:#1a1a1a; }
+  #twodLiveRoot .twod-vip-sub{ font-size:12.5px; color:#8a8a8a; }
+  #twodLiveRoot .twod-vip-status-chip{
+    display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:6px 14px; border-radius:999px;
+    font-size:12px; font-weight:700;
+  }
+  #twodLiveRoot .twod-vip-status-chip.approved{ background:#e3f9ee; color:#1fae6e; }
+  #twodLiveRoot .twod-vip-status-chip.pending{ background:#fff4e0; color:#b8790a; }
+  #twodLiveRoot .twod-vip-status-chip.rejected{ background:#fde9e9; color:#c13a3a; }
+  #twodLiveRoot .twod-vip-status-chip.guest{ background:#eef1fb; color:#1a237e; }
+  #twodLiveRoot .twod-vip-panel{
+    background:#fff; border:1px solid #ececef; border-radius:14px;
+    padding:20px; margin:0 12px 16px; box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  }
+  #twodLiveRoot .twod-vip-panel h3{ font-size:14.5px; font-weight:800; margin:0 0 12px; color:#1a1a1a; }
+  #twodLiveRoot .twod-vip-panel p.desc-text{ font-size:12.5px; color:#7a7f9a; line-height:1.75; margin:0 0 16px; }
+  #twodLiveRoot .twod-vip-id-highlight{
+    background:#fff8e6; border:1.5px dashed #e0b64a; border-radius:10px;
+    padding:14px; text-align:center; margin-bottom:14px;
+  }
+  #twodLiveRoot .twod-vip-id-highlight .label{ font-size:11px; color:#8a7238; margin-bottom:6px; }
+  #twodLiveRoot .twod-vip-id-highlight .value{ font-family:monospace; font-size:18px; font-weight:800; color:#a8790a; letter-spacing:0.03em; }
+  #twodLiveRoot .twod-vip-auth-tabs{ display:flex; gap:6px; background:#f5f6fa; border-radius:10px; padding:4px; margin-bottom:18px; }
+  #twodLiveRoot .twod-vip-auth-tab{
+    flex:1; text-align:center; padding:9px; border-radius:8px; font-size:12.5px; font-weight:700;
+    cursor:pointer; color:#8a8a8a; transition:all .15s;
+  }
+  #twodLiveRoot .twod-vip-auth-tab.active{ background:#1a237e; color:#ffd700; }
+  #twodLiveRoot .twod-vip-field{ text-align:left; margin-bottom:12px; }
+  #twodLiveRoot .twod-vip-field label{ display:block; font-size:11.5px; color:#8a8a8a; margin-bottom:6px; font-weight:600; }
+  #twodLiveRoot .twod-vip-field input{
+    width:100%; background:#f5f6fa; border:1.5px solid #ececef; color:#1a1a1a;
+    padding:11px 14px; border-radius:8px; font-size:14px; outline:none; font-family:inherit;
+  }
+  #twodLiveRoot .twod-vip-field input:focus{ border-color:#1a237e; background:#fff; }
+  #twodLiveRoot .twod-vip-error{ color:#c13a3a; font-size:12px; margin:-4px 0 12px; min-height:14px; }
+  #twodLiveRoot .twod-vip-btn{
+    display:inline-flex; align-items:center; gap:7px; justify-content:center; width:100%;
+    border:none; padding:12px 20px; border-radius:999px; font-family:inherit; font-weight:700; font-size:13.5px;
+    cursor:pointer; transition:transform .15s, background .15s; margin-bottom:10px;
+  }
+  #twodLiveRoot .twod-vip-btn.primary{ background:#1a237e; color:#ffd700; }
+  #twodLiveRoot .twod-vip-btn.primary:hover{ transform:translateY(-1px); background:#242f96; }
+  #twodLiveRoot .twod-vip-btn.outline{ background:transparent; border:1.5px solid #d7dce6; color:#1a1a1a; }
+  #twodLiveRoot .twod-vip-btn.danger{ background:#fde9e9; color:#c13a3a; }
+  #twodLiveRoot .twod-vip-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+  #twodLiveRoot .twod-vip-spin{
+    display:inline-block; width:14px; height:14px; border-radius:50%;
+    border:2px solid rgba(255,215,0,0.35); border-top-color:#ffd700;
+    animation: spin .6s linear infinite; vertical-align:middle; margin-right:6px;
+  }
 </style>
 </head>
 <body>
@@ -375,7 +573,7 @@
 <div class="page active" id="page-home">
   <header>
     <div class="header-inner">
-      <div class="brand">APyar<span>Book</span></div>
+      <div class="brand">Read<span>Hub</span></div>
       <div class="header-icons">
         <div class="icon-circle" onclick="document.getElementById('searchInput').focus()">🔍</div>
         <div class="icon-circle" onclick="openNotificationsModal()">
@@ -399,6 +597,7 @@
 
   <div class="filter-row" id="filterRow">
     <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">အားလုံး</button>
+    <button class="filter-chip" id="twodLiveChip" onclick="goPage('twodlive')">🎯 2D Live</button>
     <button class="filter-chip" data-filter="free" onclick="setFilter('free')">Free</button>
     <button class="filter-chip" data-filter="premium" onclick="setFilter('premium')">Premium</button>
   </div>
@@ -444,6 +643,11 @@
   </header>
 
   <div id="profileContent"></div>
+</div>
+
+<!-- ============ 2D LIVE PAGE ============ -->
+<div class="page" id="page-twodlive">
+  <div id="twodLiveRoot"></div>
 </div>
 
 <!-- ============ BOTTOM NAV ============ -->
@@ -494,6 +698,14 @@ const TELEGRAM_LINK_FALLBACK = "https://t.me/your_username";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* ---- 2D Live/Gift Card သီးသန့် Supabase Project (Book Shop project ကနေ ခွဲထားသည်) ----
+   👇 Supabase.com မှာ Project အသစ် ဆောက်ပြီး Project Settings → API ထဲက
+   Project URL နှင့် anon public key ကို ဒီနေရာမှာ လာထည့်ပါ */
+const TWOD_SUPABASE_URL = "https://znvaosikyiicyvnspkmh.supabase.co";
+const TWOD_SUPABASE_ANON_KEY = "sb_publishable_04wxAavPatruxsQdu-CK6Q_6XFGqwxC";
+
+const sb2d = window.supabase.createClient(TWOD_SUPABASE_URL, TWOD_SUPABASE_ANON_KEY);
+
 let ALL_BOOKS = [];
 let CURRENT_FILTER = "all";
 let TELEGRAM_LINK = TELEGRAM_LINK_FALLBACK;
@@ -503,6 +715,13 @@ let TELEGRAM_LINK = TELEGRAM_LINK_FALLBACK;
 let USER_ID = localStorage.getItem("user_id") || null;
 let USER_NAME = localStorage.getItem("user_name") || null;
 let USER_STATUS = "guest"; // guest | pending | approved | rejected
+
+// 2D VIP account session — separate account system (2D Supabase project) from the Book Site account above.
+// VIP_ID lives on the server (vip_users table) tied to phone+password, so logging in on ANY
+// browser/device recovers the same VIP key & approval status.
+let VIP_ID = localStorage.getItem("twod_vip_id") || null;
+let VIP_NAME = localStorage.getItem("twod_vip_name") || null;
+let VIP_STATUS = "guest"; // guest | pending | approved | rejected
 
 function showToast(msg) {
   const t = document.getElementById("toast");
@@ -536,6 +755,10 @@ function genUserId() {
   const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
   return "USR-" + rand;
 }
+function genVipKey() {
+  const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return "VIP-" + rand;
+}
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -549,7 +772,10 @@ function escapeHtml(str) {
 async function dbGetBooks() {
   showLoadingBar();
   try {
-    const { data, error } = await sb.from("books").select("*").order("created_at", { ascending: false });
+    // Book အရေအတွက် တစ်နေ့တစ်နေ့ တိုးလာလည်း Query size ကို ထိန်းချုပ်ဖို့ Cap ထားတယ်
+    // (Free/Premium rail တွေက item အနည်းငယ်ပဲ ပြရုံမို့ 200 ဆိုတာ ရာနှင့်ချီတဲ့ Book library
+    // အတွက် လုံလောက်ပါတယ်; ဒီထက်ကျော်လာရင် Pagination ထပ်ထည့်ရပါမယ်)
+    const { data, error } = await sb.from("books").select("*").order("created_at", { ascending: false }).limit(200);
     if (error) throw error;
     return { success: true, books: data.map(b => ({
       BookID: b.id, Title: b.title, Author: b.author, CoverURL: b.cover_url,
@@ -639,6 +865,49 @@ async function dbLoginUser(phone, password) {
   finally { hideLoadingBar(); }
 }
 
+async function dbCheckVipUser(vipId) {
+  showLoadingBar();
+  try {
+    const { data, error } = await sb2d.from("vip_users").select("*").eq("id", vipId).maybeSingle();
+    if (error) throw error;
+    if (!data) return { success: false, message: "VIP Key not found" };
+    return { success: true, status: data.status, name: data.name };
+  } catch (e) { return { success: false, message: e.message }; }
+  finally { hideLoadingBar(); }
+}
+
+async function dbRegisterVipUser(name, phone, password) {
+  showLoadingBar();
+  try {
+    if (!name) return { success: false, message: "အမည် ထည့်ပါ" };
+    if (!phone) return { success: false, message: "ဖုန်းနံပါတ် ထည့်ပါ" };
+    if (!password || password.length < 4) return { success: false, message: "Password အနည်းဆုံး ၄ လုံး ထည့်ပါ" };
+
+    const { data: existing } = await sb2d.from("vip_users").select("id").eq("phone", phone).maybeSingle();
+    if (existing) return { success: false, message: "ဒီဖုန်းနံပါတ်ဖြင့် VIP Account ရှိပြီးသားပါ — Login ဝင်ပါ" };
+
+    const vipId = genVipKey();
+    const { error } = await sb2d.from("vip_users").insert({
+      id: vipId, name, phone, password_hash: simpleHash(password), status: "pending",
+    });
+    if (error) throw error;
+    return { success: true, vipId, status: "pending", name };
+  } catch (e) { return { success: false, message: e.message }; }
+  finally { hideLoadingBar(); }
+}
+
+async function dbLoginVipUser(phone, password) {
+  showLoadingBar();
+  try {
+    const { data, error } = await sb2d.from("vip_users").select("*").eq("phone", phone).maybeSingle();
+    if (error) throw error;
+    if (!data) return { success: false, message: "VIP Account မတွေ့ပါ" };
+    if (data.password_hash !== simpleHash(password)) return { success: false, message: "Password မှားနေပါတယ်" };
+    return { success: true, vipId: data.id, status: data.status, name: data.name };
+  } catch (e) { return { success: false, message: e.message }; }
+  finally { hideLoadingBar(); }
+}
+
 async function dbGetSettings() {
   showLoadingBar();
   try {
@@ -655,9 +924,11 @@ async function dbGetSettings() {
 function goPage(name) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.nav === name));
+  document.querySelectorAll(".nav-item[data-nav]").forEach(n => n.classList.toggle("active", n.dataset.nav === name));
+  document.querySelector(".bottom-nav").style.display = (name === "twodlive") ? "none" : "";
   window.scrollTo({ top: 0, behavior: "instant" });
   if (name === "profile") renderProfilePage();
+  if (name === "twodlive") initTwodLive();
 }
 
 function scrollToBooks() {
@@ -728,11 +999,14 @@ function renderBooks() {
     const freeBooks = ALL_BOOKS.filter(b => (b.Type || "free").toLowerCase() === "free");
     const premiumBooks = ALL_BOOKS.filter(b => (b.Type || "").toLowerCase() === "premium");
 
+    // Home rail တွေမှာ item အနည်းငယ်ပဲ ပြမယ် (DOM size/image load ချွေတာဖို့) —
+    // "View all" နှိပ်ရင် filter view ကနေ အားလုံးကို မြင်ရမယ်
+    const RAIL_DISPLAY_CAP = 15;
     document.getElementById("freeRail").innerHTML = freeBooks.length
-      ? freeBooks.map(bookCardHtml).join("")
+      ? freeBooks.slice(0, RAIL_DISPLAY_CAP).map(bookCardHtml).join("")
       : `<div class="empty" style="width:100%;">Free စာအုပ် မရှိသေးပါ</div>`;
     document.getElementById("premiumRail").innerHTML = premiumBooks.length
-      ? premiumBooks.map(bookCardHtml).join("")
+      ? premiumBooks.slice(0, RAIL_DISPLAY_CAP).map(bookCardHtml).join("")
       : `<div class="empty" style="width:100%;">Premium စာအုပ် မရှိသေးပါ</div>`;
     return;
   }
@@ -909,7 +1183,7 @@ function notificationAppliesToMe(n) {
   return !n.target_user_id || n.target_user_id === USER_ID;
 }
 
-async function loadNotificationHistory() {
+async function loadNotificationHistory(isPoll) {
   try {
     const { data, error } = await sb
       .from("notifications")
@@ -917,9 +1191,27 @@ async function loadNotificationHistory() {
       .order("created_at", { ascending: false })
       .limit(30);
     if (error) throw error;
-    ALL_NOTIFICATIONS = data.filter(notificationAppliesToMe);
-    const lastSeen = getLastSeenNotifTime();
-    UNREAD_NOTIF_COUNT = ALL_NOTIFICATIONS.filter(n => new Date(n.created_at) > new Date(lastSeen)).length;
+    const mine = data.filter(notificationAppliesToMe);
+
+    // Polling ဖြစ်ရင် Notification အသစ် ရောက်လာလား စစ်ပြီး Banner ပြမယ်
+    if (isPoll && ALL_NOTIFICATIONS.length > 0) {
+      const newestKnownId = ALL_NOTIFICATIONS[0].id;
+      const newOnes = [];
+      for (const n of mine) {
+        if (n.id === newestKnownId) break;
+        newOnes.push(n);
+      }
+      if (newOnes.length > 0) {
+        UNREAD_NOTIF_COUNT += newOnes.length;
+        showNotifBanner(newOnes[0].title, newOnes[0].message);
+      }
+    }
+
+    ALL_NOTIFICATIONS = mine;
+    if (!isPoll) {
+      const lastSeen = getLastSeenNotifTime();
+      UNREAD_NOTIF_COUNT = ALL_NOTIFICATIONS.filter(n => new Date(n.created_at) > new Date(lastSeen)).length;
+    }
     updateNotifDot();
   } catch (e) { /* silent */ }
 }
@@ -961,18 +1253,11 @@ function hideNotifBanner() {
   document.getElementById("notifBanner").classList.remove("show");
 }
 
-function subscribeToNotifications() {
-  sb.channel("public:notifications")
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, (payload) => {
-      const n = payload.new;
-      if (!notificationAppliesToMe(n)) return; // targeted at someone else — ignore
-
-      ALL_NOTIFICATIONS.unshift(n);
-      UNREAD_NOTIF_COUNT++;
-      updateNotifDot();
-      showNotifBanner(n.title, n.message);
-    })
-    .subscribe();
+// Realtime (Supabase channel/websocket) အစား Polling သုံးထားတယ် — Concurrent
+// connection limit (Free tier 200) ကို လုံးဝရှောင်ဖို့ + User အများကြီးရှိလည်း
+// scale ကျယ်အောင်ဖြစ်ပါတယ်။ 15 စက္ကန့်တစ်ခါ Check လုပ်မယ်။
+function pollNotifications() {
+  loadNotificationHistory(true);
 }
 
 async function handleRefreshStatusClick() {
@@ -1135,6 +1420,179 @@ function logoutUser(silent) {
   if (!silent) { renderProfilePage(); showToast("Logout ထွက်ပြီးပါပြီ"); }
 }
 
+/* ---------------- 2D VIP ACCOUNT (Register / Login / Dashboard) ---------------- */
+async function refreshVipStatus() {
+  if (!VIP_ID) { VIP_STATUS = "guest"; return; }
+  try {
+    const data = await dbCheckVipUser(VIP_ID);
+    if (data.success) {
+      VIP_STATUS = data.status;
+      if (data.name) { VIP_NAME = data.name; localStorage.setItem("twod_vip_name", data.name); }
+    } else {
+      logoutVipUser(true);
+    }
+  } catch (e) { /* silent */ }
+  twodRenderGiftCards(); // refresh lock state on VIP posts if status changed
+  if (document.getElementById("twodVipContent") && document.getElementById("twodVipContent").classList.contains("active")) {
+    renderVipPage();
+  }
+}
+
+function renderVipPage() {
+  const el = document.getElementById("twodVipContentInner");
+  if (!el) return;
+
+  if (!VIP_ID) {
+    el.innerHTML = `
+      <div class="twod-vip-header">
+        <div class="twod-vip-avatar">👑</div>
+        <p class="twod-vip-name">Guest</p>
+        <p class="twod-vip-sub">VIP 2D ဂဏန်းလက်ဆောင် Post ဖတ်ဖို့ VIP Key ရယူပါ</p>
+      </div>
+      <div class="twod-vip-panel">
+        <div class="twod-vip-auth-tabs">
+          <div class="twod-vip-auth-tab active" data-viptab="login" onclick="switchVipAuthTab('login')">Login ဝင်မယ်</div>
+          <div class="twod-vip-auth-tab" data-viptab="register" onclick="switchVipAuthTab('register')">VIP Key အသစ်ယူမယ်</div>
+        </div>
+        <div id="vipAuthFormArea"></div>
+      </div>`;
+    switchVipAuthTab("login");
+    return;
+  }
+
+  const initial = (VIP_NAME || "V").charAt(0).toUpperCase();
+  let statusLabel = "Pending — Admin စစ်ဆေးနေဆဲ";
+  let statusClass = "pending";
+  if (VIP_STATUS === "approved") { statusLabel = "VIP Unlocked ✓"; statusClass = "approved"; }
+  if (VIP_STATUS === "rejected") { statusLabel = "ငြင်းပယ်ခံရသည်"; statusClass = "rejected"; }
+
+  el.innerHTML = `
+    <div class="twod-vip-header">
+      <div class="twod-vip-avatar">${escapeHtml(initial)}</div>
+      <p class="twod-vip-name">${escapeHtml(VIP_NAME || "VIP Account")}</p>
+      <p class="twod-vip-sub">${escapeHtml(VIP_ID)}</p>
+      <span class="twod-vip-status-chip ${statusClass}">${statusClass === 'approved' ? '👑' : '⏳'} ${statusLabel}</span>
+    </div>
+
+    <div class="twod-vip-panel">
+      <h3>VIP Unlock</h3>
+      <p class="desc-text">
+        VIP 2D ဂဏန်းလက်ဆောင် Post များကို ဖတ်ရှုနိုင်ရန် အောက်ပါ VIP Key ကို Copy ကူးပြီး
+        Telegram ကနေ Admin ကို ပေးပို့ပါ။ Admin approve လုပ်ပေးလိုက်ရင် ဒီအကောင့်နဲ့
+        Login ဝင်တဲ့နေရာတိုင်းမှာ VIP Post အားလုံး Unlock ဖြစ်နေပါလိမ့်မယ်။
+      </p>
+      <div class="twod-vip-id-highlight">
+        <div class="label">သင့် VIP Key (ဒါကိုပဲ Admin ဆီ ပို့ပါ)</div>
+        <div class="value">${escapeHtml(VIP_ID)}</div>
+      </div>
+      <button class="twod-vip-btn outline" onclick="copyVipKey()">VIP Key ကို Copy ကူးမယ်</button>
+      <a class="twod-vip-btn primary" style="text-decoration:none;" href="${TELEGRAM_LINK}" target="_blank">Telegram ကို ဖွင့်မယ်</a>
+    </div>
+
+    <div class="twod-vip-panel">
+      <button class="twod-vip-btn outline" id="vipRefreshStatusBtn" onclick="handleVipRefreshStatusClick()">Status အသစ် စစ်မယ်</button>
+    </div>
+
+    <div class="twod-vip-panel">
+      <button class="twod-vip-btn danger" onclick="logoutVipUser()">Logout ထွက်မယ်</button>
+    </div>`;
+}
+
+function switchVipAuthTab(tab) {
+  document.querySelectorAll(".twod-vip-auth-tab").forEach(t => t.classList.toggle("active", t.dataset.viptab === tab));
+  const area = document.getElementById("vipAuthFormArea");
+  if (tab === "login") {
+    area.innerHTML = `
+      <div class="twod-vip-field"><label>ဖုန်းနံပါတ်</label><input type="text" id="vipLoginPhone" placeholder="09xxxxxxxxx"></div>
+      <div class="twod-vip-field"><label>Password</label><input type="password" id="vipLoginPw" placeholder="••••••••" onkeydown="if(event.key==='Enter') submitVipLogin()"></div>
+      <div class="twod-vip-error" id="vipAuthError"></div>
+      <button class="twod-vip-btn primary" id="vipLoginSubmitBtn" onclick="submitVipLogin()">Login ဝင်မယ်</button>
+    `;
+  } else {
+    area.innerHTML = `
+      <div class="twod-vip-field"><label>အမည်</label><input type="text" id="vipRegName" placeholder="သင့်အမည်"></div>
+      <div class="twod-vip-field"><label>ဖုန်းနံပါတ်</label><input type="text" id="vipRegPhone" placeholder="09xxxxxxxxx"></div>
+      <div class="twod-vip-field"><label>Password</label><input type="password" id="vipRegPw" placeholder="အနည်းဆုံး ၄ လုံး" onkeydown="if(event.key==='Enter') submitVipRegister()"></div>
+      <div class="twod-vip-error" id="vipAuthError"></div>
+      <button class="twod-vip-btn primary" id="vipRegisterSubmitBtn" onclick="submitVipRegister()">VIP Key ယူမယ်</button>
+    `;
+  }
+}
+
+async function submitVipRegister() {
+  const name = document.getElementById("vipRegName").value.trim();
+  const phone = document.getElementById("vipRegPhone").value.trim();
+  const pw = document.getElementById("vipRegPw").value;
+  const err = document.getElementById("vipAuthError");
+  const btn = document.getElementById("vipRegisterSubmitBtn");
+  err.textContent = "";
+  btn.disabled = true;
+  btn.innerHTML = `<span class="twod-vip-spin"></span> VIP Key ယူနေသည်...`;
+
+  const data = await dbRegisterVipUser(name, phone, pw);
+
+  btn.disabled = false;
+  btn.textContent = "VIP Key ယူမယ်";
+
+  if (!data.success) { err.textContent = data.message || "မအောင်မြင်ပါ"; return; }
+
+  VIP_ID = data.vipId;
+  VIP_NAME = data.name;
+  VIP_STATUS = data.status;
+  localStorage.setItem("twod_vip_id", VIP_ID);
+  localStorage.setItem("twod_vip_name", VIP_NAME);
+  showToast("VIP Key ရပြီးပါပြီ");
+  renderVipPage();
+  twodRenderGiftCards();
+}
+
+async function submitVipLogin() {
+  const phone = document.getElementById("vipLoginPhone").value.trim();
+  const pw = document.getElementById("vipLoginPw").value;
+  const err = document.getElementById("vipAuthError");
+  const btn = document.getElementById("vipLoginSubmitBtn");
+  err.textContent = "";
+  btn.disabled = true;
+  btn.innerHTML = `<span class="twod-vip-spin"></span> Login ဝင်နေသည်...`;
+
+  const data = await dbLoginVipUser(phone, pw);
+
+  btn.disabled = false;
+  btn.textContent = "Login ဝင်မယ်";
+
+  if (!data.success) { err.textContent = data.message || "မအောင်မြင်ပါ"; return; }
+
+  VIP_ID = data.vipId;
+  VIP_NAME = data.name;
+  VIP_STATUS = data.status;
+  localStorage.setItem("twod_vip_id", VIP_ID);
+  localStorage.setItem("twod_vip_name", VIP_NAME);
+  showToast("Login ဝင်ပြီးပါပြီ");
+  renderVipPage();
+  twodRenderGiftCards();
+}
+
+function copyVipKey() {
+  navigator.clipboard.writeText(VIP_ID).then(() => showToast("VIP Key ကို Copy ကူးပြီးပါပြီ"));
+}
+
+function logoutVipUser(silent) {
+  VIP_ID = null; VIP_NAME = null; VIP_STATUS = "guest";
+  localStorage.removeItem("twod_vip_id");
+  localStorage.removeItem("twod_vip_name");
+  twodRenderGiftCards();
+  if (!silent) { renderVipPage(); showToast("Logout ထွက်ပြီးပါပြီ"); }
+}
+
+async function handleVipRefreshStatusClick() {
+  const btn = document.getElementById("vipRefreshStatusBtn");
+  if (!btn) return;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="twod-vip-spin"></span> Status စစ်နေသည်...`;
+  await refreshVipStatus();
+  showToast("Status အသစ် ရယူပြီးပါပြီ");
+}
+
 async function loadSettings() {
   try {
     const data = await dbGetSettings();
@@ -1147,6 +1605,467 @@ async function loadSettings() {
   } catch (e) { /* silent */ }
 }
 
+/* ---------------- 2D LIVE ---------------- */
+const TWOD_API_BASE_URL = 'https://api.thaistock2d.com';
+const TWOD_RESULT_TIMES = [
+  { time: '12:01', hour: 12, minute: 1 },
+  { time: '16:30', hour: 16, minute: 30 }
+];
+let twodPreviousValue = '';
+let twodInitialized = false;
+let twodIntervalsStarted = false;
+
+function twodLiveHtml() {
+  return `
+    <div class="live-close-row">
+      <div class="live-close-btn" onclick="goPage('home')">✕</div>
+    </div>
+
+    <div class="twod-live-content" id="twodLiveContent">
+      <div class="live-main">
+        <div class="live-number-big glow" id="twodLive2d">--</div>
+        <div class="live-status">
+          <span class="refresh-ic">↻</span>
+          <span>Updated: <span id="twodLiveDateTime">--</span></span>
+        </div>
+        <div class="set-value-row">
+          <div class="sv-box">
+            <div class="label">SET</div>
+            <div class="value" id="twodSetIndex">--</div>
+          </div>
+          <div class="sv-box">
+            <div class="label">VALUE</div>
+            <div class="value" id="twodSetValue">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="today-results">
+        <div class="time-card">
+          <div class="time-label">12:01 PM</div>
+          <div class="tc-row">
+            <div class="tc-col"><div class="tc-label">SET</div><div class="tc-value" id="twodSet1201">--</div></div>
+            <div class="tc-col"><div class="tc-label">Value</div><div class="tc-value" id="twodVal1201">--</div></div>
+            <div class="tc-col tc-2d"><div class="tc-label">2D</div><div class="tc-value" id="twodResult1201">--</div></div>
+          </div>
+        </div>
+        <div class="time-card">
+          <div class="time-label">4:30 PM</div>
+          <div class="tc-row">
+            <div class="tc-col"><div class="tc-label">SET</div><div class="tc-value" id="twodSet1630">--</div></div>
+            <div class="tc-col"><div class="tc-label">Value</div><div class="tc-value" id="twodVal1630">--</div></div>
+            <div class="tc-col tc-2d"><div class="tc-label">2D</div><div class="tc-value" id="twodResult1630">--</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="countdown-section">
+        <div class="countdown-label">နောက်ထွက်ချိန်အထိ</div>
+        <div class="countdown-time" id="twodCountdown">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="twod-history-section" id="twodHistoryContent">
+      <table class="twod-history-table">
+        <thead>
+          <tr>
+            <th>ရက်စွဲ</th>
+            <th>12:01 PM</th>
+            <th>4:30 PM</th>
+          </tr>
+        </thead>
+        <tbody id="twodHistoryTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="twod-gift-section" id="twodGiftContent">
+      <div class="twod-gift-filter-row">
+        <button class="twod-gift-filter-chip active" data-giftfilter="all" onclick="twodSetGiftFilter('all')">အားလုံး</button>
+        <button class="twod-gift-filter-chip" data-giftfilter="free" onclick="twodSetGiftFilter('free')">Free</button>
+        <button class="twod-gift-filter-chip" data-giftfilter="vip" onclick="twodSetGiftFilter('vip')">👑 VIP</button>
+      </div>
+      <div class="twod-gift-list" id="twodGiftList">
+        <div class="twod-gift-loading"><div class="spinner" style="width:16px;height:16px;border-width:2px;border-color:rgba(255,255,255,0.25);border-top-color:#ffd700;"></div> Post များ ခေတ္တစောင့်ပါ...</div>
+      </div>
+      <div class="twod-gift-empty" id="twodGiftEmpty" style="display:none;">2D ဂဏန်းလက်ဆောင် Post များ မရှိသေးပါ။</div>
+    </div>
+
+    <div class="twod-vip-section" id="twodVipContent">
+      <div id="twodVipContentInner"></div>
+    </div>
+
+    <div class="twod-tab-bar">
+      <div class="twod-tab-item active" id="twodTabLive" onclick="twodSwitchTab('live')">
+        <div class="tab-icon">📡</div>
+        <div class="tab-label">Live</div>
+      </div>
+      <div class="twod-tab-item" id="twodTabHistory" onclick="twodSwitchTab('history')">
+        <div class="tab-icon">📅</div>
+        <div class="tab-label">History</div>
+      </div>
+      <div class="twod-tab-item" id="twodTabGift" onclick="twodSwitchTab('gift')">
+        <div class="tab-icon">🎁</div>
+        <div class="tab-label">ဂဏန်းလက်ဆောင်</div>
+      </div>
+      <div class="twod-tab-item" id="twodTabVip" onclick="twodSwitchTab('vip')">
+        <div class="tab-icon">👑</div>
+        <div class="tab-label">VIP</div>
+      </div>
+    </div>
+  `;
+}
+
+function initTwodLive() {
+  const root = document.getElementById("twodLiveRoot");
+  if (!twodInitialized) {
+    root.innerHTML = twodLiveHtml();
+    twodInitialized = true;
+  }
+  twodUpdateLive2D();
+  twodUpdateCountdown();
+  refreshVipStatus();
+  if (!twodIntervalsStarted) {
+    setInterval(twodPollTick, 3000);
+    setInterval(twodUpdateCountdown, 1000);
+    setInterval(refreshVipStatus, 15000); // VIP approve ဖြစ်လာရင် auto-detect
+    twodIntervalsStarted = true;
+  }
+}
+
+function twodIsNearResultTime() {
+  // 12:00:30–12:04:00 နှင့် 16:29:30–16:33:00 ကြားထဲမှာ API ကနေ ဂဏန်း update ခနစောင့်နေတတ်လို့
+  // ပိုမြန်မြန် (2 sec) poll လုပ်ဖို့ window ဖွင့်ပေးထားတယ်
+  const now = new Date();
+  const offsetMin = 6.5 * 60 - now.getTimezoneOffset();
+  const mm = new Date(now.getTime() + offsetMin * 60000);
+  const mins = mm.getHours() * 60 + mm.getMinutes() + mm.getSeconds() / 60;
+  const windows = [[12 * 60 + 0.5, 12 * 60 + 4], [16 * 60 + 29.5, 16 * 60 + 33]];
+  return windows.some(([s, e]) => mins >= s && mins <= e);
+}
+
+let twodLastPollTs = 0;
+function twodPollTick() {
+  const nearResult = twodIsNearResultTime();
+  const now = Date.now();
+  const interval = nearResult ? 2000 : 5000;
+  if (now - twodLastPollTs < interval) return;
+  twodLastPollTs = now;
+  twodUpdateLive2D();
+}
+
+function twodSwitchTab(tab) {
+  const liveContent = document.getElementById('twodLiveContent');
+  const historyContent = document.getElementById('twodHistoryContent');
+  const giftContent = document.getElementById('twodGiftContent');
+  const vipContent = document.getElementById('twodVipContent');
+  const tabLive = document.getElementById('twodTabLive');
+  const tabHistory = document.getElementById('twodTabHistory');
+  const tabGift = document.getElementById('twodTabGift');
+  const tabVip = document.getElementById('twodTabVip');
+
+  liveContent.classList.add('hidden');
+  historyContent.classList.remove('active');
+  giftContent.classList.remove('active');
+  vipContent.classList.remove('active');
+  tabLive.classList.remove('active');
+  tabHistory.classList.remove('active');
+  tabGift.classList.remove('active');
+  tabVip.classList.remove('active');
+
+  if (tab === 'live') {
+    liveContent.classList.remove('hidden');
+    tabLive.classList.add('active');
+  } else if (tab === 'history') {
+    historyContent.classList.add('active');
+    tabHistory.classList.add('active');
+    twodUpdateHistoryResults();
+  } else if (tab === 'gift') {
+    giftContent.classList.add('active');
+    tabGift.classList.add('active');
+    twodLoadGiftCards();
+  } else if (tab === 'vip') {
+    vipContent.classList.add('active');
+    tabVip.classList.add('active');
+    renderVipPage();
+  }
+}
+
+async function twodFetchData(endpoint) {
+  try {
+    const response = await fetch(`${TWOD_API_BASE_URL}/${endpoint}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching ${endpoint}:`, error);
+    return null;
+  }
+}
+
+function twodTriggerHeartbeat() {
+  const el = document.getElementById('twodLive2d');
+  if (!el) return;
+  el.classList.remove('glow');
+  el.classList.remove('heartbeat');
+  void el.offsetWidth;
+  el.classList.add('heartbeat');
+  setTimeout(() => {
+    el.classList.remove('heartbeat');
+    el.classList.add('glow');
+  }, 1000);
+}
+
+function twodIsFreezeWindow() {
+  // 12:01 ဂဏန်းထွက်ပြီးရင် 12:10 အထိ (11:59:30 ကလည်း safe margin) Live ဂဏန်းကို ရပ်ထားမယ်
+  // 4:30 ဂဏန်းလည်း အလားတူ 4:39 အထိ ရပ်ထားမယ်
+  const now = new Date();
+  const offsetMin = 6.5 * 60 - now.getTimezoneOffset();
+  const mm = new Date(now.getTime() + offsetMin * 60000);
+  const mins = mm.getHours() * 60 + mm.getMinutes() + mm.getSeconds() / 60;
+  const windows = [[12 * 60 + 1, 12 * 60 + 10], [16 * 60 + 30, 16 * 60 + 39]];
+  return windows.some(([s, e]) => mins >= s && mins <= e);
+}
+
+async function twodUpdateLive2D() {
+  if (twodIsFreezeWindow()) return; // ဂဏန်းထွက်ချိန် ကျော်သွားရင် နောက် Live ဂဏန်း မပြောင်းတော့ပါ
+  const data = await twodFetchData('live');
+  if (data && data.live) {
+    let twod = data.live.twod;
+    const liveEl = document.getElementById('twodLive2d');
+    if (!liveEl) return;
+
+    if (twod === '--' && data.result && data.result.length > 0) {
+      const lastResult = data.result[data.result.length - 1];
+      twod = lastResult.twod || '--';
+    }
+
+    if (twod !== twodPreviousValue && twod !== '--') {
+      liveEl.textContent = twod;
+      twodTriggerHeartbeat();
+      twodPreviousValue = twod;
+    } else if (twodPreviousValue === '') {
+      liveEl.textContent = twod;
+      twodPreviousValue = twod;
+    }
+
+    document.getElementById('twodSetIndex').textContent = data.live.set || '--';
+    document.getElementById('twodSetValue').textContent = data.live.value || '--';
+
+    if (data.live.time && data.live.time !== '--') {
+      const dt = new Date(data.live.time.replace(' ', 'T'));
+      if (!isNaN(dt.getTime())) {
+        document.getElementById('twodLiveDateTime').textContent = dt.toLocaleString('en-US', {
+          month: '2-digit', day: '2-digit', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+        });
+      } else {
+        document.getElementById('twodLiveDateTime').textContent = data.live.date || '--';
+      }
+    } else if (data.server_time) {
+      const dt = new Date(data.server_time.replace(' ', 'T'));
+      if (!isNaN(dt.getTime())) {
+        document.getElementById('twodLiveDateTime').textContent = dt.toLocaleString('en-US', {
+          month: '2-digit', day: '2-digit', year: 'numeric',
+          hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+        });
+      } else {
+        document.getElementById('twodLiveDateTime').textContent = data.server_time;
+      }
+    }
+
+    if (data.result) {
+      const resultsFound = { '12:01:00': false, '16:30:00': false };
+      data.result.forEach(r => {
+        if (r.open_time === '12:01:00') {
+          document.getElementById('twodResult1201').textContent = r.twod || '--';
+          document.getElementById('twodSet1201').textContent = r.set || '--';
+          document.getElementById('twodVal1201').textContent = r.value || '--';
+          resultsFound['12:01:00'] = true;
+        }
+        if (r.open_time === '16:30:00') {
+          document.getElementById('twodResult1630').textContent = r.twod || '--';
+          document.getElementById('twodSet1630').textContent = r.set || '--';
+          document.getElementById('twodVal1630').textContent = r.value || '--';
+          resultsFound['16:30:00'] = true;
+        }
+      });
+
+      // API ဆီက result ပေါက်ချိန်ရောက်ပေမယ့် data ကမရသေးရင် "ခဏစောင့်ပါ" ပြပေးမယ်
+      if (!resultsFound['12:01:00'] && twodPastResultTime(12, 1)) {
+        const el = document.getElementById('twodResult1201');
+        if ((el.textContent || '').trim() === '--') el.textContent = '⏳';
+      }
+      if (!resultsFound['16:30:00'] && twodPastResultTime(16, 30)) {
+        const el = document.getElementById('twodResult1630');
+        if ((el.textContent || '').trim() === '--') el.textContent = '⏳';
+      }
+    }
+  }
+}
+
+function twodPastResultTime(hour, minute) {
+  const now = new Date();
+  const offsetMin = 6.5 * 60 - now.getTimezoneOffset();
+  const mm = new Date(now.getTime() + offsetMin * 60000);
+  const target = hour * 60 + minute;
+  const cur = mm.getHours() * 60 + mm.getMinutes();
+  return cur >= target && cur <= target + 20; // ထွက်ချိန်ကနေ ၂၀ မိနစ်အတွင်း
+}
+
+async function twodUpdateHistoryResults() {
+  const data = await twodFetchData('2d_result');
+  const historyTableBody = document.getElementById('twodHistoryTableBody');
+  historyTableBody.innerHTML = '';
+
+  if (data && data.length > 0) {
+    data.forEach(dayResult => {
+      const date = dayResult.date || '';
+      const resultsByTime = {};
+      if (dayResult.child) {
+        dayResult.child.forEach(res => {
+          resultsByTime[res.time] = res.twod;
+        });
+      }
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${date}</td>
+        <td style="font-size:1.3em;">${resultsByTime['12:01:00'] || '--'}</td>
+        <td style="font-size:1.3em;">${resultsByTime['16:30:00'] || '--'}</td>
+      `;
+      historyTableBody.appendChild(row);
+    });
+  }
+}
+
+let twodGiftCardsLoaded = false;
+let ALL_TWOD_GIFT_CARDS = [];
+let TWOD_GIFT_FILTER = "all"; // all | free | vip
+
+async function twodLoadGiftCards() {
+  const listEl = document.getElementById('twodGiftList');
+  const emptyEl = document.getElementById('twodGiftEmpty');
+  listEl.innerHTML = `<div class="twod-gift-loading"><div class="spinner" style="width:16px;height:16px;border-width:2px;border-color:rgba(255,255,255,0.25);border-top-color:#ffd700;"></div> Post များ ခေတ္တစောင့်ပါ...</div>`;
+  emptyEl.style.display = "none";
+
+  try {
+    const { data, error } = await sb2d.from("gift_cards").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    ALL_TWOD_GIFT_CARDS = data || [];
+    twodRenderGiftCards();
+  } catch (e) {
+    listEl.innerHTML = `<div class="twod-gift-loading">Post များ ဆွဲယူ၍ မရပါ</div>`;
+  }
+}
+
+function twodSetGiftFilter(f) {
+  TWOD_GIFT_FILTER = f;
+  document.querySelectorAll(".twod-gift-filter-chip").forEach(b => b.classList.toggle("active", b.dataset.giftfilter === f));
+  twodRenderGiftCards();
+}
+
+function twodRenderGiftCards() {
+  const listEl = document.getElementById('twodGiftList');
+  const emptyEl = document.getElementById('twodGiftEmpty');
+  if (!listEl) return;
+
+  const list = ALL_TWOD_GIFT_CARDS.filter(g => {
+    const type = (g.type || "free").toLowerCase();
+    return TWOD_GIFT_FILTER === "all" || type === TWOD_GIFT_FILTER;
+  });
+
+  if (list.length === 0) {
+    listEl.innerHTML = "";
+    emptyEl.style.display = "block";
+    return;
+  }
+  emptyEl.style.display = "none";
+  listEl.innerHTML = list.map(twodGiftCardHtml).join("");
+}
+
+const TWOD_GIFT_DEFAULT_AVATAR = "data:image/svg+xml;utf8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a237e"/>
+      <stop offset="1" stop-color="#1565c0"/>
+    </linearGradient>
+  </defs>
+  <circle cx="40" cy="40" r="40" fill="url(#g)"/>
+  <text x="40" y="52" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="900"
+        fill="#ffd700" text-anchor="middle">2D</text>
+</svg>`);
+const TWOD_GIFT_PAGE_NAME = "2D ဂဏန်းလက်ဆောင်";
+
+function twodGiftCardHtml(g) {
+  const dateStr = g.created_at ? new Date(g.created_at).toLocaleString() : "";
+  const isVip = (g.type || "free").toLowerCase() === "vip";
+  const pageName = isVip ? "2D Member" : "2D Free";
+  const tagHtml = `<span class="twod-gift-tag ${isVip ? 'vip' : 'free'}">${isVip ? '👑 VIP' : 'Free'}</span>`;
+
+  const imgHtml = g.image_url
+    ? `<div class="twod-gift-card-img"><img src="${escapeHtml(g.image_url)}" alt=""></div>`
+    : "";
+
+  const vipJoinBtn = (isVip && VIP_STATUS !== "approved")
+    ? `<div class="twod-gift-vip-joinrow"><button onclick="twodSwitchTab('vip')">👑 VIP ဝင်မယ် ›</button></div>`
+    : "";
+
+  return `
+    <div class="twod-gift-card">
+      <div class="twod-gift-card-header">
+        <div class="twod-gift-card-avatar"><img src="${TWOD_GIFT_DEFAULT_AVATAR}" alt=""></div>
+        <div class="twod-gift-card-headertext">
+          <div class="twod-gift-card-pagename">${pageName}</div>
+          <div class="twod-gift-card-time">${escapeHtml(dateStr)}</div>
+        </div>
+      </div>
+      <div class="twod-gift-card-body">
+        <div style="margin-bottom:4px;">${tagHtml}</div>
+        <div class="twod-gift-card-title">${escapeHtml(g.title || "")}</div>
+        <div class="twod-gift-card-desc">${escapeHtml(g.description || "")}</div>
+      </div>
+      ${imgHtml}
+      ${vipJoinBtn}
+    </div>`;
+}
+
+function twodUpdateCountdown() {
+  const el = document.getElementById('twodCountdown');
+  if (!el) return;
+  const now = new Date();
+  const myanmarOffset = 6.5 * 60;
+  const localOffset = now.getTimezoneOffset();
+  const myanmarTime = new Date(now.getTime() + (myanmarOffset + localOffset) * 60000);
+
+  let nextResultTime = null;
+
+  for (const rt of TWOD_RESULT_TIMES) {
+    const resultDateTime = new Date(myanmarTime);
+    resultDateTime.setHours(rt.hour, rt.minute, 0, 0);
+    if (resultDateTime > myanmarTime) {
+      nextResultTime = resultDateTime;
+      break;
+    }
+  }
+
+  if (!nextResultTime) {
+    nextResultTime = new Date(myanmarTime);
+    nextResultTime.setDate(myanmarTime.getDate() + 1);
+    nextResultTime.setHours(TWOD_RESULT_TIMES[0].hour, TWOD_RESULT_TIMES[0].minute, 0, 0);
+  }
+
+  const diff = nextResultTime - myanmarTime;
+
+  if (diff > 0) {
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    el.textContent =
+      `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  } else {
+    el.textContent = 'ယခုထွက်ရှိနေသည်';
+  }
+}
+
 /* ---------------- INIT ---------------- */
 document.getElementById("bookOverlay").addEventListener("click", e => { if (e.target.id === "bookOverlay") closeBook(); });
 document.getElementById("notifOverlay").addEventListener("click", e => { if (e.target.id === "notifOverlay") closeNotificationsModal(); });
@@ -1154,8 +2073,9 @@ document.getElementById("notifOverlay").addEventListener("click", e => { if (e.t
 loadSettings();
 loadBooks();
 refreshUserStatus();
+refreshVipStatus();
 loadNotificationHistory();
-subscribeToNotifications();
+setInterval(pollNotifications, 15000); // Realtime websocket အစား Polling သုံးထား (connection limit ရှောင်ဖို့)
 setInterval(refreshUserStatus, 15000); // Premium approve ဖြစ်လာရင် auto-detect
 </script>
 </body>
