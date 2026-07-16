@@ -269,6 +269,7 @@
   }
   .pay-method-card.selected{ border-color:var(--primary); background:var(--primary-light); }
   .pay-method-card .pm-icon{ font-size:26px; margin-bottom:6px; }
+  .pay-method-card .pm-icon img{ width:36px; height:36px; object-fit:contain; border-radius:8px; }
   .pay-method-card .pm-name{ font-size:13px; font-weight:700; }
   .pay-detail-box{
     display:none; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm);
@@ -1442,10 +1443,10 @@ function openPremiumOrderModal() {
       </div>
       <div class="pay-method-grid">
         <div class="pay-method-card" id="pmCardKbz" onclick="selectPayMethod('kbz')">
-          <div class="pm-icon">🟢</div><div class="pm-name">KBZ Pay</div>
+          <div class="pm-icon"><img src="https://i.ibb.co/zTbxy6Zn/download-4.png" alt="KBZ Pay"></div><div class="pm-name">KBZ Pay</div>
         </div>
         <div class="pay-method-card" id="pmCardWave" onclick="selectPayMethod('wave')">
-          <div class="pm-icon">🟡</div><div class="pm-name">Wave Pay</div>
+          <div class="pm-icon"><img src="https://i.ibb.co/3m3rPzX4/download-1.jpg" alt="Wave Pay"></div><div class="pm-name">Wave Pay</div>
         </div>
       </div>
 
@@ -1583,10 +1584,10 @@ function openVipOrderModal() {
       </div>
       <div class="pay-method-grid">
         <div class="pay-method-card" id="vipPmCardKbz" onclick="selectVipPayMethod('kbz')">
-          <div class="pm-icon">🟢</div><div class="pm-name">KBZ Pay</div>
+          <div class="pm-icon"><img src="https://i.ibb.co/zTbxy6Zn/download-4.png" alt="KBZ Pay"></div><div class="pm-name">KBZ Pay</div>
         </div>
         <div class="pay-method-card" id="vipPmCardWave" onclick="selectVipPayMethod('wave')">
-          <div class="pm-icon">🟡</div><div class="pm-name">Wave Pay</div>
+          <div class="pm-icon"><img src="https://i.ibb.co/3m3rPzX4/download-1.jpg" alt="Wave Pay"></div><div class="pm-name">Wave Pay</div>
         </div>
       </div>
 
@@ -2655,4 +2656,3 @@ setInterval(refreshUserStatus, 15000); // Premium approve ဖြစ်လာရ�
 </script>
 </body>
 </html>
- 
