@@ -93,22 +93,27 @@
   }
   .hero-deco.b{ bottom:-50px; right:30px; width:100px; height:100px; background:rgba(124,108,240,0.10); top:auto; }
 
-  /* ---------- MARQUEE (စာတန်းပြေး) ---------- */
-  .marquee-wrap{
-    margin:6px 20px 22px; background:var(--primary-light); border-radius:999px;
-    overflow:hidden; padding:12px 0; position:relative;
+  /* ---------- IMAGE SLIDER (Banner) ---------- */
+  .banner-slider{
+    margin:6px 20px 22px; position:relative; border-radius:var(--radius-lg);
+    overflow:hidden; aspect-ratio:16/9; background:linear-gradient(135deg,#1e1a3a,#17142c);
+    box-shadow:0 12px 30px rgba(0,0,0,0.25);
   }
-  .marquee-track{
-    display:flex; white-space:nowrap; width:max-content;
-    animation: marquee-scroll 22s linear infinite;
+  .banner-slider-track{
+    display:flex; height:100%; transition:transform .5s cubic-bezier(.4,0,.2,1);
   }
-  .marquee-track span{
-    padding:0 40px; font-size:13.5px; font-weight:700; color:var(--primary);
+  .banner-slider-track img{
+    width:100%; height:100%; object-fit:cover; flex-shrink:0; cursor:pointer;
   }
-  @keyframes marquee-scroll{
-    0%{ transform:translateX(0); }
-    100%{ transform:translateX(-50%); }
+  .banner-slider-dots{
+    position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; z-index:2;
   }
+  .banner-slider-dots .dot{
+    width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.4);
+    transition:all .25s; cursor:pointer;
+  }
+  .banner-slider-dots .dot.active{ width:18px; border-radius:4px; background:#fff; }
   .hero h1{ font-size:23px; font-weight:800; margin:0 0 8px; line-height:1.3; position:relative; }
   .hero h1 .accent{ color:var(--primary); }
   .hero p{ color:var(--muted); font-size:13.5px; line-height:1.7; margin:0 0 6px; max-width:76%; position:relative; }
@@ -665,7 +670,6 @@
         <div class="icon-circle theme-toggle-btn" onclick="toggleTheme()" title="Dark / Light Mode">
           <span class="moon">🌙</span><span class="sun">☀️</span>
         </div>
-        <div class="icon-circle" onclick="document.getElementById('searchInput').focus()">🔍</div>
         <div class="icon-circle" onclick="openNotificationsModal()">
           🔔<span class="dot-badge" id="notifDot"></span>
         </div>
@@ -673,16 +677,9 @@
     </div>
   </header>
 
-  <div class="marquee-wrap" id="marqueeWrap" style="display:none;">
-    <div class="marquee-track">
-      <span id="marqueeText1"></span>
-      <span id="marqueeText2"></span>
-    </div>
-  </div>
-
-  <div class="search-wrap">
-    <span class="icon">🔍</span>
-    <input id="searchInput" placeholder="စာအုပ်နာမည် (သို့) စာရေးသူ ရှာပါ..." oninput="renderBooks()">
+  <div class="banner-slider" id="bannerSlider" style="display:none;">
+    <div class="banner-slider-track" id="bannerSliderTrack"></div>
+    <div class="banner-slider-dots" id="bannerSliderDots"></div>
   </div>
 
   <div class="filter-row" id="filterRow">
@@ -1034,10 +1031,10 @@ async function dbRegisterUser(name, phone, password) {
 
     const userId = genUserId();
     const { error } = await sb.from("users").insert({
-      id: userId, name, phone, password_hash: simpleHash(password), status: "pending",
+      id: userId, name, phone, password_hash: simpleHash(password), status: "free",
     });
     if (error) throw error;
-    return { success: true, userId, status: "pending", name, phone };
+    return { success: true, userId, status: "free", name, phone };
   } catch (e) { return { success: false, message: e.message }; }
   finally { hideLoadingBar(); }
 }
@@ -1077,10 +1074,10 @@ async function dbRegisterVipUser(name, phone, password) {
 
     const vipId = genVipKey();
     const { error } = await sb2d.from("vip_users").insert({
-      id: vipId, name, phone, password_hash: simpleHash(password), status: "pending",
+      id: vipId, name, phone, password_hash: simpleHash(password), status: "free",
     });
     if (error) throw error;
-    return { success: true, vipId, status: "pending", name, phone };
+    return { success: true, vipId, status: "free", name, phone };
   } catch (e) { return { success: false, message: e.message }; }
   finally { hideLoadingBar(); }
 }
@@ -1095,6 +1092,14 @@ async function dbLoginVipUser(phone, password) {
     return { success: true, vipId: data.id, status: data.status, name: data.name, phone: data.phone };
   } catch (e) { return { success: false, message: e.message }; }
   finally { hideLoadingBar(); }
+}
+
+async function dbGetBannerSlides() {
+  try {
+    const { data, error } = await sb.from("banner_slides").select("*").order("sort_order", { ascending: true });
+    if (error) throw error;
+    return { success: true, slides: data || [] };
+  } catch (e) { return { success: false, slides: [] }; }
 }
 
 async function dbGetSettings() {
@@ -1243,8 +1248,8 @@ function bookCardHtml(b) {
 }
 
 function renderBooks() {
-  const q = document.getElementById("searchInput").value.trim().toLowerCase();
-  const searching = !!q || CURRENT_FILTER !== "all";
+  const q = "";
+  const searching = CURRENT_FILTER !== "all";
 
   const freeSection = document.getElementById("freeSection");
   const premiumSection = document.getElementById("premiumSection");
@@ -1833,17 +1838,19 @@ function renderProfilePage() {
   }
 
   const initial = (USER_NAME || "U").charAt(0).toUpperCase();
-  let statusLabel = "Pending — Admin စစ်ဆေးနေဆဲ";
-  let statusClass = "pending";
-  if (USER_STATUS === "approved") { statusLabel = "Premium Unlocked ✓"; statusClass = "approved"; }
-  if (USER_STATUS === "rejected") { statusLabel = "ငြင်းပယ်ခံရသည်"; statusClass = "rejected"; }
+  let statusLabel = "Free Account";
+  let statusClass = "guest";
+  let statusIcon = "🆓";
+  if (USER_STATUS === "pending") { statusLabel = "Pending — Admin စစ်ဆေးနေဆဲ"; statusClass = "pending"; statusIcon = "⏳"; }
+  if (USER_STATUS === "approved") { statusLabel = "Premium Unlocked ✓"; statusClass = "approved"; statusIcon = "👑"; }
+  if (USER_STATUS === "rejected") { statusLabel = "ငြင်းပယ်ခံရသည်"; statusClass = "rejected"; statusIcon = "⏳"; }
 
   el.innerHTML = `
     <div class="profile-header">
       <div class="profile-avatar">${escapeHtml(initial)}</div>
       <p class="profile-name">${escapeHtml(USER_NAME || "Account")}</p>
       <p class="profile-sub">${escapeHtml(USER_ID)}</p>
-      <span class="status-chip ${statusClass}">${statusClass === 'approved' ? '👑' : '⏳'} ${statusLabel}</span>
+      <span class="status-chip ${statusClass}">${statusIcon} ${statusLabel}</span>
     </div>
 
     <div class="profile-section">
@@ -2008,17 +2015,19 @@ function renderVipPage() {
   }
 
   const initial = (VIP_NAME || "V").charAt(0).toUpperCase();
-  let statusLabel = "Pending — Admin စစ်ဆေးနေဆဲ";
-  let statusClass = "pending";
-  if (VIP_STATUS === "approved") { statusLabel = "VIP Unlocked ✓"; statusClass = "approved"; }
-  if (VIP_STATUS === "rejected") { statusLabel = "ငြင်းပယ်ခံရသည်"; statusClass = "rejected"; }
+  let statusLabel = "Free Account";
+  let statusClass = "guest";
+  let statusIcon = "🆓";
+  if (VIP_STATUS === "pending") { statusLabel = "Pending — Admin စစ်ဆေးနေဆဲ"; statusClass = "pending"; statusIcon = "⏳"; }
+  if (VIP_STATUS === "approved") { statusLabel = "VIP Unlocked ✓"; statusClass = "approved"; statusIcon = "👑"; }
+  if (VIP_STATUS === "rejected") { statusLabel = "ငြင်းပယ်ခံရသည်"; statusClass = "rejected"; statusIcon = "⏳"; }
 
   el.innerHTML = `
     <div class="twod-vip-header">
       <div class="twod-vip-avatar">${escapeHtml(initial)}</div>
       <p class="twod-vip-name">${escapeHtml(VIP_NAME || "VIP Account")}</p>
       <p class="twod-vip-sub">${escapeHtml(VIP_ID)}</p>
-      <span class="twod-vip-status-chip ${statusClass}">${statusClass === 'approved' ? '👑' : '⏳'} ${statusLabel}</span>
+      <span class="twod-vip-status-chip ${statusClass}">${statusIcon} ${statusLabel}</span>
     </div>
 
     <div class="twod-vip-panel">
@@ -2151,17 +2160,51 @@ async function loadSettings() {
   try {
     const data = await dbGetSettings();
     if (data.success && data.telegramLink) TELEGRAM_LINK = sanitizeTelegramLink(data.telegramLink);
-    if (data.success && data.announcement) {
-      document.getElementById("marqueeText1").textContent = data.announcement;
-      document.getElementById("marqueeText2").textContent = data.announcement;
-      document.getElementById("marqueeWrap").style.display = "block";
-    }
     if (data.success) {
       PREMIUM_PRICE = data.premiumPrice || "0";
       KBZ_NAME = data.kbzName || ""; KBZ_NUMBER = data.kbzNumber || "";
       WAVE_NAME = data.waveName || ""; WAVE_NUMBER = data.waveNumber || "";
     }
   } catch (e) { /* silent */ }
+  initBannerSlider();
+}
+
+/* ---------------- IMAGE SLIDER (Banner) ---------------- */
+let bannerSlideIndex = 0;
+let bannerSlideTimer = null;
+
+async function initBannerSlider() {
+  const res = await dbGetBannerSlides();
+  const slides = (res.slides || []).filter(s => s.image_url);
+  const wrap = document.getElementById("bannerSlider");
+  const track = document.getElementById("bannerSliderTrack");
+  const dots = document.getElementById("bannerSliderDots");
+  if (!slides.length) { wrap.style.display = "none"; return; }
+
+  track.innerHTML = slides.map(s => `<img src="${escapeHtml(s.image_url)}" alt="banner" ${s.link_url ? `onclick="window.open('${escapeHtml(s.link_url)}','_blank')"` : ""}>`).join("");
+  dots.innerHTML = slides.map((_, i) => `<span class="dot ${i === 0 ? "active" : ""}" onclick="goToBannerSlide(${i})"></span>`).join("");
+  wrap.style.display = "block";
+  bannerSlideIndex = 0;
+
+  if (bannerSlideTimer) clearInterval(bannerSlideTimer);
+  if (slides.length > 1) {
+    bannerSlideTimer = setInterval(() => {
+      bannerSlideIndex = (bannerSlideIndex + 1) % slides.length;
+      updateBannerSliderPosition();
+    }, 3500);
+  }
+}
+
+function goToBannerSlide(i) {
+  bannerSlideIndex = i;
+  updateBannerSliderPosition();
+}
+
+function updateBannerSliderPosition() {
+  const track = document.getElementById("bannerSliderTrack");
+  if (!track) return;
+  track.style.transform = `translateX(-${bannerSlideIndex * 100}%)`;
+  document.querySelectorAll("#bannerSliderDots .dot").forEach((d, i) => d.classList.toggle("active", i === bannerSlideIndex));
 }
 
 /* ---------------- 2D LIVE ---------------- */
