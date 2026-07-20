@@ -12,21 +12,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://pl30424234.effectivecpmnetwork.com/6c/c6/2f/6cc62fc95d3e0d1eafa72c8dcf8c6b37.js"></script>
-  <script src="https://pl30424236.effectivecpmnetwork.com/86/a8/4d/86a84dce10d5919f17172217759be319.js"></script>
-  <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"></script>
-<div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
-  <script>
-  atOptions = {
-    'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
-    'format' : 'iframe',
-    'height' : 50,
-    'width' : 320,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"></script>
-  
 <style>
   html{ color-scheme: dark; }
   html[data-theme="light"]{ color-scheme: light; }
@@ -704,6 +689,20 @@
     <button class="filter-chip" data-filter="premium" onclick="setFilter('premium')">Premium</button>
   </div>
 
+  <!-- Adsterra: Banner 320x50 -->
+  <div style="display:flex; justify-content:center; margin:0 0 20px;">
+    <script>
+      atOptions = {
+        'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"></script>
+  </div>
+
   <!-- Free rail -->
   <div class="section" id="freeSection">
     <div class="section-head">
@@ -714,6 +713,12 @@
       <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
     </div>
     <div class="rail-loading-text" id="freeRailLoadingText"><div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> စာအုပ်များ ခေတ္တစောင့်ပါ...</div>
+  </div>
+
+  <!-- Adsterra: Native Banner (between rails) -->
+  <div style="margin:4px 20px 22px;">
+    <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"></script>
+    <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
   </div>
 
   <!-- Premium rail -->
@@ -1339,6 +1344,10 @@ async function openBook(id) {
   if (!unlocked) {
     renderLockedView();
     return;
+  }
+
+  if (!isPremium) {
+    try { window.open("https://www.effectivecpmnetwork.com/akqzxpt9?key=1c69af0ea01ddafa760c20cdf86d985f", "_blank"); } catch (e) { /* silent */ }
   }
 
   modal.innerHTML = `<div class="modal-loading"><div class="spinner"></div><p>မာတိကာ ခေတ္တစောင့်ပါ...</p></div>`;
@@ -2276,9 +2285,27 @@ function twodLiveHtml() {
         </div>
       </div>
 
+      <div style="display:flex; justify-content:center; margin:14px 0;">
+        <script>
+          atOptions = {
+            'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        <\/script>
+        <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"><\/script>
+      </div>
+
       <div class="countdown-section">
         <div class="countdown-label">နောက်ထွက်ချိန်အထိ</div>
         <div class="countdown-time" id="twodCountdown">--:--:--</div>
+      </div>
+
+      <div style="margin:14px 0;">
+        <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"><\/script>
+        <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
       </div>
     </div>
 
@@ -2712,5 +2739,9 @@ loadNotificationHistory();
 setInterval(pollNotifications, 15000); // Realtime websocket အစား Polling သုံးထား (connection limit ရှောင်ဖို့)
 setInterval(refreshUserStatus, 15000); // Premium approve ဖြစ်လာရင် auto-detect
 </script>
+
+
+<!-- Adsterra: Social Bar (global) -->
+<script src="https://pl30424236.effectivecpmnetwork.com/86/a8/4d/86a84dce10d5919f17172217759be319.js"></script>
 </body>
 </html>
