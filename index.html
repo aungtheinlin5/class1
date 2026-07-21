@@ -188,6 +188,33 @@
     width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.9);
     display:flex; align-items:center; justify-content:center; font-size:15px;
   }
+  .video-play-badge{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    z-index:1; pointer-events:none;
+  }
+  .video-play-badge::before{
+    content:''; position:absolute; inset:0; background:rgba(10,10,20,0.15);
+  }
+  .video-play-badge{
+    color:#fff; font-size:15px; text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .video-play-badge{
+    width:100%; height:100%;
+  }
+  .video-play-badge{
+    display:flex;
+  }
+  .video-play-badge::after{
+    content:'▶'; position:relative; z-index:1; width:38px; height:38px; border-radius:50%;
+    background:rgba(255,255,255,0.92); color:var(--primary); display:flex; align-items:center;
+    justify-content:center; font-size:14px; padding-left:3px; box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  }
+  .video-player-wrap{
+    width:100%; aspect-ratio:16/9; background:#000; position:relative;
+  }
+  .video-player-wrap video{
+    width:100%; height:100%; display:block; background:#000;
+  }
   .book-title{ font-size:13.5px; font-weight:700; margin:0 0 3px; line-height:1.35; color:var(--ink); }
   .book-meta{ display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--muted); }
   .book-meta .rating{ display:flex; align-items:center; gap:3px; color:var(--gold); font-weight:700; }
@@ -752,6 +779,55 @@
   <div id="profileContent"></div>
 </div>
 
+<!-- ============ VIDEO PAGE ============ -->
+<div class="page" id="page-videos">
+  <header>
+    <div class="header-inner">
+      <div class="brand">Read<span class="accent">Hub</span> 🎬</div>
+    </div>
+  </header>
+
+  <div class="filter-row" id="videoFilterRow">
+    <button class="filter-chip active" data-vfilter="all" onclick="setVideoFilter('all')">အားလုံး</button>
+    <button class="filter-chip" data-vfilter="free" onclick="setVideoFilter('free')">Free</button>
+    <button class="filter-chip" data-vfilter="vip" onclick="setVideoFilter('vip')">👑 VIP</button>
+  </div>
+
+  <!-- Free Video rail -->
+  <div class="section" id="freeVideoSection">
+    <div class="section-head">
+      <h2>Free Video</h2>
+      <span class="view-all" onclick="setVideoFilter('free')">View all ›</span>
+    </div>
+    <div class="rail" id="freeVideoRail">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+  </div>
+
+  <!-- VIP Video rail -->
+  <div class="section" id="vipVideoSection">
+    <div class="section-head">
+      <h2>👑 VIP Video</h2>
+      <span class="view-all" onclick="setVideoFilter('vip')">View all ›</span>
+    </div>
+    <div class="rail" id="vipVideoRail">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+  </div>
+
+  <!-- Filtered results grid -->
+  <div class="section" id="videoResultsSection" style="display:none;">
+    <div class="section-head"><h2 id="videoResultsHeading">ရလဒ်များ</h2><span id="videoCount" style="font-size:12.5px; color:var(--muted);"></span></div>
+    <div class="full-grid" id="videoResultsGrid"></div>
+    <div class="empty" id="videoEmptyState" style="display:none;">ဒီအမျိုးအစားအတွက် Video မရှိသေးပါ။</div>
+  </div>
+</div>
+
+<!-- VIDEO PLAYER MODAL -->
+<div class="overlay" id="videoOverlay">
+  <div class="modal" id="videoModal"></div>
+</div>
+
 <!-- ============ 2D LIVE PAGE ============ -->
 <div class="page" id="page-twodlive">
   <div id="twodLiveRoot"></div>
@@ -766,6 +842,9 @@
 <div class="bottom-nav">
   <div class="nav-item active" data-nav="home" onclick="goPage('home')">
     <span class="nav-icon">🏠</span><span>Home</span>
+  </div>
+  <div class="nav-item" data-nav="videos" onclick="goPage('videos')">
+    <span class="nav-icon">🎬</span><span>Video</span>
   </div>
   <div class="nav-item" data-nav="profile" onclick="goPage('profile')">
     <span class="nav-icon">👤</span><span>Profile</span>
@@ -912,6 +991,10 @@ async function uploadScreenshotToImgbb(file) {
 
 let ALL_BOOKS = [];
 let CURRENT_FILTER = "all";
+let ALL_VIDEOS = [];
+let CURRENT_VIDEO_FILTER = "all";
+let VIDEOS_LOADED = false;
+let CURRENT_VIDEO = null;
 let TELEGRAM_LINK = TELEGRAM_LINK_FALLBACK;
 
 // Account session — USER_ID lives on the server (Users table) tied to phone+password,
@@ -998,6 +1081,32 @@ async function dbGetBook(id) {
     if (error) throw error;
     return { success: true, book: {
       BookID: data.id, Title: data.title, Author: data.author, CoverURL: data.cover_url,
+      Type: data.type, Description: data.description,
+    } };
+  } catch (e) { return { success: false, message: e.message }; }
+  finally { hideLoadingBar(); }
+}
+
+async function dbGetVideos() {
+  showLoadingBar();
+  try {
+    const { data, error } = await sb.from("videos").select("*").order("created_at", { ascending: false }).limit(200);
+    if (error) throw error;
+    return { success: true, videos: data.map(v => ({
+      VideoID: v.id, Title: v.title, ThumbnailURL: v.thumbnail_url, VideoURL: v.video_url,
+      Type: v.type, Description: v.description,
+    })) };
+  } catch (e) { return { success: false, message: e.message }; }
+  finally { hideLoadingBar(); }
+}
+
+async function dbGetVideo(id) {
+  showLoadingBar();
+  try {
+    const { data, error } = await sb.from("videos").select("*").eq("id", id).single();
+    if (error) throw error;
+    return { success: true, video: {
+      VideoID: data.id, Title: data.title, ThumbnailURL: data.thumbnail_url, VideoURL: data.video_url,
       Type: data.type, Description: data.description,
     } };
   } catch (e) { return { success: false, message: e.message }; }
@@ -1214,6 +1323,7 @@ function goPage(name) {
   window.scrollTo({ top: 0, behavior: "instant" });
   if (name === "profile") renderProfilePage();
   if (name === "twodlive") initTwodLive();
+  if (name === "videos" && !VIDEOS_LOADED) loadVideos();
 }
 
 function scrollToBooks() {
@@ -1319,6 +1429,173 @@ function renderBooks() {
   }
   empty.style.display = "none";
   grid.innerHTML = list.map(bookCardHtml).join("");
+}
+
+/* ---------------- LOAD VIDEOS ---------------- */
+async function loadVideos() {
+  VIDEOS_LOADED = true;
+  try {
+    const data = await dbGetVideos();
+    if (data.success) {
+      ALL_VIDEOS = data.videos;
+      renderVideos();
+    } else {
+      showToast("Video များ ဆွဲယူ၍ မရပါ");
+    }
+  } catch (e) {
+    document.getElementById("freeVideoRail").innerHTML = "";
+    document.getElementById("vipVideoRail").innerHTML = "";
+    showToast("Supabase config ကို စစ်ပေးပါ");
+  }
+}
+
+function setVideoFilter(f) {
+  CURRENT_VIDEO_FILTER = f;
+  document.querySelectorAll("#videoFilterRow .filter-chip").forEach(b => b.classList.toggle("active", b.dataset.vfilter === f));
+  renderVideos();
+}
+
+function videoCardHtml(v) {
+  const isVip = (v.Type || "free").toLowerCase() === "vip";
+  const isUnlocked = !isVip || USER_STATUS === "approved";
+  const thumbContent = v.ThumbnailURL
+    ? `<img src="${escapeHtml(v.ThumbnailURL)}" alt="">`
+    : `<span class="fallback-title">${escapeHtml(v.Title || "")}</span>`;
+  return `
+    <div class="book-card" onclick="openVideo('${v.VideoID}')">
+      <div class="book-cover" style="${!v.ThumbnailURL ? 'background:linear-gradient(160deg,#7d76e8,#4a3fd6);' : ''}">
+        ${thumbContent}
+        <div class="video-play-badge">▶</div>
+        <span class="tag-pill ${isVip ? 'premium' : 'free'}">${isVip ? 'VIP' : 'Free'}</span>
+        ${isVip && !isUnlocked ? `<div class="lock-icon"><span>🔒</span></div>` : ''}
+      </div>
+      <p class="book-title">${escapeHtml(v.Title || "အမည်မဲ့")}</p>
+    </div>`;
+}
+
+function renderVideos() {
+  const searching = CURRENT_VIDEO_FILTER !== "all";
+
+  const freeSection = document.getElementById("freeVideoSection");
+  const vipSection = document.getElementById("vipVideoSection");
+  const resultsSection = document.getElementById("videoResultsSection");
+
+  if (!searching) {
+    freeSection.style.display = "";
+    vipSection.style.display = "";
+    resultsSection.style.display = "none";
+
+    const freeVideos = ALL_VIDEOS.filter(v => (v.Type || "free").toLowerCase() === "free");
+    const vipVideos = ALL_VIDEOS.filter(v => (v.Type || "").toLowerCase() === "vip");
+
+    const RAIL_DISPLAY_CAP = 15;
+    document.getElementById("freeVideoRail").innerHTML = freeVideos.length
+      ? freeVideos.slice(0, RAIL_DISPLAY_CAP).map(videoCardHtml).join("")
+      : `<div class="empty" style="width:100%;">Free Video မရှိသေးပါ</div>`;
+    document.getElementById("vipVideoRail").innerHTML = vipVideos.length
+      ? vipVideos.slice(0, RAIL_DISPLAY_CAP).map(videoCardHtml).join("")
+      : `<div class="empty" style="width:100%;">VIP Video မရှိသေးပါ</div>`;
+    return;
+  }
+
+  freeSection.style.display = "none";
+  vipSection.style.display = "none";
+  resultsSection.style.display = "";
+
+  const list = ALL_VIDEOS.filter(v => CURRENT_VIDEO_FILTER === "all" || (v.Type || "free").toLowerCase() === CURRENT_VIDEO_FILTER);
+
+  document.getElementById("videoResultsHeading").textContent = CURRENT_VIDEO_FILTER === "vip" ? "VIP Video" : "Free Video";
+  document.getElementById("videoCount").textContent = list.length + " ခု";
+  const grid = document.getElementById("videoResultsGrid");
+  const empty = document.getElementById("videoEmptyState");
+
+  if (list.length === 0) {
+    grid.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  grid.innerHTML = list.map(videoCardHtml).join("");
+}
+
+/* ---------------- VIDEO PLAYER MODAL ---------------- */
+async function openVideo(id) {
+  const overlay = document.getElementById("videoOverlay");
+  const modal = document.getElementById("videoModal");
+  modal.innerHTML = `<div class="modal-loading"><div class="spinner"></div><p>Video ခေတ္တစောင့်ပါ...</p></div>`;
+  overlay.classList.add("open");
+
+  const data = await dbGetVideo(id);
+  if (!data.success) {
+    modal.innerHTML = `<div class="modal-body">Video မတွေ့ပါ</div>`;
+    return;
+  }
+  CURRENT_VIDEO = data.video;
+  const isVip = (CURRENT_VIDEO.Type || "free").toLowerCase() === "vip";
+  const unlocked = !isVip || USER_STATUS === "approved";
+
+  if (!unlocked) {
+    renderVideoLockedView();
+    return;
+  }
+
+  if (!isVip) {
+    try { window.open("https://www.effectivecpmnetwork.com/akqzxpt9?key=1c69af0ea01ddafa760c20cdf86d985f", "_blank"); } catch (e) { /* silent */ }
+  }
+
+  renderVideoPlayer();
+}
+
+function renderVideoLockedView() {
+  const modal = document.getElementById("videoModal");
+  const v = CURRENT_VIDEO;
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div><h2>${escapeHtml(v.Title || "")}</h2></div>
+      <button class="close-btn" onclick="closeVideo()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="desc">${escapeHtml(v.Description || "")}</div>
+      <div class="lock-box">
+        <div class="icon">🔒</div>
+        <h3>ဒါက VIP Video ပါ</h3>
+        <p>ဒီ Video ကိုကြည့်ဖို့ အကောင့်ဝင်ပြီး Premium ဝင်ရပါမယ်။</p>
+        <button class="btn btn-primary" onclick="closeVideo(); goPage('profile');">အကောင့်ကြည့်မယ်</button>
+      </div>
+    </div>`;
+}
+
+function renderVideoPlayer() {
+  const modal = document.getElementById("videoModal");
+  const v = CURRENT_VIDEO;
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div><h2>${escapeHtml(v.Title || "")}</h2></div>
+      <button class="close-btn" onclick="closeVideo()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <div class="video-player-wrap">
+        <video
+          id="mainVideoPlayer"
+          controls
+          controlsList="nodownload"
+          playsinline
+          preload="metadata"
+          poster="${v.ThumbnailURL ? escapeHtml(v.ThumbnailURL) : ''}"
+        >
+          <source src="${escapeHtml(v.VideoURL)}" type="video/mp4">
+          သင့် Browser က Video ကို support မလုပ်ပါ။
+        </video>
+      </div>
+      <div class="desc" style="padding:16px 20px;">${escapeHtml(v.Description || "")}</div>
+    </div>`;
+}
+
+function closeVideo() {
+  const player = document.getElementById("mainVideoPlayer");
+  if (player) { player.pause(); }
+  document.getElementById("videoOverlay").classList.remove("open");
+  CURRENT_VIDEO = null;
 }
 
 /* ---------------- BOOK READ MODAL ---------------- */
@@ -2726,6 +3003,7 @@ async function loadVipSettings() {
 
 /* ---------------- INIT ---------------- */
 document.getElementById("bookOverlay").addEventListener("click", e => { if (e.target.id === "bookOverlay") closeBook(); });
+document.getElementById("videoOverlay").addEventListener("click", e => { if (e.target.id === "videoOverlay") closeVideo(); });
 document.getElementById("notifOverlay").addEventListener("click", e => { if (e.target.id === "notifOverlay") closeNotificationsModal(); });
 document.getElementById("premiumOverlay").addEventListener("click", e => { if (e.target.id === "premiumOverlay") closePremiumOrderModal(); });
 document.getElementById("vipOrderOverlay").addEventListener("click", e => { if (e.target.id === "vipOrderOverlay") closeVipOrderModal(); });
