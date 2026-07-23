@@ -220,7 +220,7 @@
   .video-player-wrap{
     width:100%; aspect-ratio:16/9; background:#000; position:relative;
   }
-  .video-player-wrap video{
+  .video-player-wrap iframe{
     width:100%; height:100%; display:block; background:#000;
   }
   .book-title{ font-size:13.5px; font-weight:700; margin:0 0 3px; line-height:1.35; color:var(--ink); }
@@ -1583,25 +1583,21 @@ function renderVideoPlayer() {
     </div>
     <div class="modal-body" style="padding:0;">
       <div class="video-player-wrap">
-        <video
+        <iframe
           id="mainVideoPlayer"
-          controls
-          controlsList="nodownload"
-          playsinline
-          preload="metadata"
-          poster="${v.ThumbnailURL ? escapeHtml(v.ThumbnailURL) : ''}"
-        >
-          <source src="${escapeHtml(v.VideoURL)}" type="video/mp4">
-          သင့် Browser က Video ကို support မလုပ်ပါ။
-        </video>
+          src="${escapeHtml(v.VideoURL)}"
+          frameborder="0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+        ></iframe>
       </div>
       <div class="desc" style="padding:16px 20px;">${escapeHtml(v.Description || "")}</div>
     </div>`;
 }
 
 function closeVideo() {
-  const player = document.getElementById("mainVideoPlayer");
-  if (player) { player.pause(); }
+  const modal = document.getElementById("videoModal");
+  if (modal) modal.innerHTML = "";
   document.getElementById("videoOverlay").classList.remove("open");
   CURRENT_VIDEO = null;
 }
