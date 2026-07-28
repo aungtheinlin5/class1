@@ -220,8 +220,9 @@
   .video-player-wrap{
     width:100%; aspect-ratio:16/9; background:#000; position:relative;
   }
+  .video-player-wrap video,
   .video-player-wrap iframe{
-    width:100%; height:100%; display:block; background:#000;
+    width:100%; height:100%; display:block; background:#000; border:none;
   }
   .book-title{ font-size:13.5px; font-weight:700; margin:0 0 3px; line-height:1.35; color:var(--ink); }
   .book-meta{ display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--muted); }
@@ -700,6 +701,87 @@
 <div class="page active" id="page-home">
   <header>
     <div class="header-inner">
+      <div class="brand">Read<span class="accent">Hub</span> 🎬</div>
+    </div>
+  </header>
+
+  <div class="banner-slider" id="bannerSlider" style="display:none;">
+    <div class="banner-slider-track" id="bannerSliderTrack"></div>
+    <div class="banner-slider-dots" id="bannerSliderDots"></div>
+  </div>
+
+  <div class="filter-row" id="videoFilterRow">
+    <button class="filter-chip active" data-vfilter="all" onclick="setVideoFilter('all')">အားလုံး</button>
+    <button class="filter-chip" data-vfilter="free" onclick="setVideoFilter('free')">Free</button>
+    <button class="filter-chip" data-vfilter="vip" onclick="setVideoFilter('vip')">👑 VIP</button>
+  </div>
+
+  <!-- Adsterra: Banner 320x50 -->
+  <div style="display:flex; justify-content:center; margin:0 0 20px;">
+    <script>
+      atOptions = {
+        'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"></script>
+  </div>
+
+  <!-- Free Video rail -->
+  <div class="section" id="freeVideoSection">
+    <div class="section-head">
+      <h2>Free Video</h2>
+      <span class="view-all" onclick="setVideoFilter('free')">View all ›</span>
+    </div>
+    <div class="rail" id="freeVideoRail">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+  </div>
+
+  <!-- Adsterra: Native Banner (between rails) -->
+  <div style="margin:4px 20px 22px;">
+    <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"></script>
+    <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
+  </div>
+
+  <!-- VIP Video rail -->
+  <div class="section" id="vipVideoSection">
+    <div class="section-head">
+      <h2>👑 VIP Video</h2>
+      <span class="view-all" onclick="setVideoFilter('vip')">View all ›</span>
+    </div>
+    <div class="rail" id="vipVideoRail">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+  </div>
+
+  <!-- Filtered results grid -->
+  <div class="section" id="videoResultsSection" style="display:none;">
+    <div class="section-head"><h2 id="videoResultsHeading">ရလဒ်များ</h2><span id="videoCount" style="font-size:12.5px; color:var(--muted);"></span></div>
+    <div class="full-grid" id="videoResultsGrid"></div>
+    <div class="empty" id="videoEmptyState" style="display:none;">ဒီအမျိုးအစားအတွက် Video မရှိသေးပါ။</div>
+  </div>
+</div>
+
+
+<!-- ============ PROFILE PAGE ============ -->
+<div class="page" id="page-profile">
+  <header>
+    <div class="header-inner">
+      <div class="brand">Profile</div>
+    </div>
+  </header>
+
+  <div id="profileContent"></div>
+</div>
+
+<!-- ============ VIDEO PAGE ============ -->
+<div class="page" id="page-videos">
+  <header>
+    <div class="header-inner">
       <div class="brand">Read<span>Hub</span></div>
       <div class="header-icons">
         <div class="icon-circle theme-toggle-btn" onclick="toggleTheme()" title="Dark / Light Mode">
@@ -711,11 +793,6 @@
       </div>
     </div>
   </header>
-
-  <div class="banner-slider" id="bannerSlider" style="display:none;">
-    <div class="banner-slider-track" id="bannerSliderTrack"></div>
-    <div class="banner-slider-dots" id="bannerSliderDots"></div>
-  </div>
 
   <div class="filter-row" id="filterRow">
     <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">အားလုံး</button>
@@ -776,61 +853,6 @@
   </div>
 </div>
 
-<!-- ============ PROFILE PAGE ============ -->
-<div class="page" id="page-profile">
-  <header>
-    <div class="header-inner">
-      <div class="brand">Profile</div>
-    </div>
-  </header>
-
-  <div id="profileContent"></div>
-</div>
-
-<!-- ============ VIDEO PAGE ============ -->
-<div class="page" id="page-videos">
-  <header>
-    <div class="header-inner">
-      <div class="brand">Read<span class="accent">Hub</span> 🎬</div>
-    </div>
-  </header>
-
-  <div class="filter-row" id="videoFilterRow">
-    <button class="filter-chip active" data-vfilter="all" onclick="setVideoFilter('all')">အားလုံး</button>
-    <button class="filter-chip" data-vfilter="free" onclick="setVideoFilter('free')">Free</button>
-    <button class="filter-chip" data-vfilter="vip" onclick="setVideoFilter('vip')">👑 VIP</button>
-  </div>
-
-  <!-- Free Video rail -->
-  <div class="section" id="freeVideoSection">
-    <div class="section-head">
-      <h2>Free Video</h2>
-      <span class="view-all" onclick="setVideoFilter('free')">View all ›</span>
-    </div>
-    <div class="rail" id="freeVideoRail">
-      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
-    </div>
-  </div>
-
-  <!-- VIP Video rail -->
-  <div class="section" id="vipVideoSection">
-    <div class="section-head">
-      <h2>👑 VIP Video</h2>
-      <span class="view-all" onclick="setVideoFilter('vip')">View all ›</span>
-    </div>
-    <div class="rail" id="vipVideoRail">
-      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
-    </div>
-  </div>
-
-  <!-- Filtered results grid -->
-  <div class="section" id="videoResultsSection" style="display:none;">
-    <div class="section-head"><h2 id="videoResultsHeading">ရလဒ်များ</h2><span id="videoCount" style="font-size:12.5px; color:var(--muted);"></span></div>
-    <div class="full-grid" id="videoResultsGrid"></div>
-    <div class="empty" id="videoEmptyState" style="display:none;">ဒီအမျိုးအစားအတွက် Video မရှိသေးပါ။</div>
-  </div>
-</div>
-
 <!-- VIDEO PLAYER MODAL -->
 <div class="overlay" id="videoOverlay">
   <div class="modal" id="videoModal"></div>
@@ -852,7 +874,7 @@
     <span class="nav-icon">🏠</span><span>Home</span>
   </div>
   <div class="nav-item" data-nav="videos" onclick="goPage('videos')">
-    <span class="nav-icon">🎬</span><span>Video</span>
+    <span class="nav-icon">📚</span><span>Book</span>
   </div>
   <div class="nav-item" data-nav="profile" onclick="goPage('profile')">
     <span class="nav-icon">👤</span><span>Profile</span>
@@ -1583,21 +1605,15 @@ function renderVideoPlayer() {
     </div>
     <div class="modal-body" style="padding:0;">
       <div class="video-player-wrap">
-        <iframe
-          id="mainVideoPlayer"
-          src="${escapeHtml(v.VideoURL)}"
-          frameborder="0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowfullscreen
-        ></iframe>
+        <iframe src="${escapeHtml(v.VideoURL)}" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
       </div>
       <div class="desc" style="padding:16px 20px;">${escapeHtml(v.Description || "")}</div>
     </div>`;
 }
 
 function closeVideo() {
-  const modal = document.getElementById("videoModal");
-  if (modal) modal.innerHTML = "";
+  const player = document.getElementById("mainVideoPlayer");
+  if (player) { player.pause(); }
   document.getElementById("videoOverlay").classList.remove("open");
   CURRENT_VIDEO = null;
 }
@@ -3015,11 +3031,67 @@ document.getElementById("vipOrderOverlay").addEventListener("click", e => { if (
 loadSettings();
 loadVipSettings();
 loadBooks();
+loadVideos();
 refreshUserStatus();
 refreshVipStatus();
 loadNotificationHistory();
 setInterval(pollNotifications, 15000); // Realtime websocket အစား Polling သုံးထား (connection limit ရှောင်ဖို့)
 setInterval(refreshUserStatus, 15000); // Premium approve ဖြစ်လာရင် auto-detect
+
+/* ---------------- BACK BUTTON HANDLING ---------------- */
+// Modal ဖွင့်ထားရင် Back ကို modal ပိတ်ဖို့ပဲ သုံးမယ်၊ Website ထဲက ထွက်ဖို့ဆို 2 ကြိမ် Back နှိပ်မှ ထွက်မယ်
+(function () {
+  const ALL_OVERLAY_IDS = ["videoOverlay", "vipOrderOverlay", "bookOverlay", "premiumOverlay", "notifOverlay"];
+
+  function getOpenOverlay() {
+    for (const id of ALL_OVERLAY_IDS) {
+      const el = document.getElementById(id);
+      if (el && el.classList.contains("open")) return id;
+    }
+    return null;
+  }
+
+  function closeOverlayById(id) {
+    if (id === "videoOverlay") closeVideo();
+    else if (id === "vipOrderOverlay") closeVipOrderModal();
+    else if (id === "bookOverlay") closeBook();
+    else if (id === "premiumOverlay") closePremiumOrderModal();
+    else if (id === "notifOverlay") closeNotificationsModal();
+  }
+
+  function trapHistory() {
+    history.pushState({ appTrap: true }, "", location.href);
+  }
+
+  let exitArmed = false;
+  let exitTimer = null;
+
+  window.addEventListener("popstate", function () {
+    const openId = getOpenOverlay();
+
+    if (openId) {
+      // Modal/Overlay ပွင့်နေရင် Website ထဲကနေ မထွက်စေဘဲ Modal ကိုပဲ ပိတ်ပေး
+      closeOverlayById(openId);
+      trapHistory();
+      return;
+    }
+
+    if (!exitArmed) {
+      // ပထမအကြိမ် Back — Toast ပြပြီး Website ထဲမှာပဲထားမယ်
+      exitArmed = true;
+      showToast("နောက်တစ်ကြိမ် Back နှိပ်ပါက Website မှ ထွက်ပါမည်");
+      trapHistory();
+      clearTimeout(exitTimer);
+      exitTimer = setTimeout(() => { exitArmed = false; }, 2000);
+      return;
+    }
+
+    // ဒုတိယအကြိမ် Back (2 စက္ကန့်အတွင်း) — Website ထဲက အမှန်တကယ် ထွက်ခွင့်ပြု
+  });
+
+  // Base state တစ်ခု စောင့်ထားမှ ပထမ Back ကို ဖမ်းလို့ရမယ်
+  trapHistory();
+})();
 </script>
 
 
