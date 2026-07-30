@@ -228,6 +228,27 @@
   .book-meta{ display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--muted); }
   .book-meta .rating{ display:flex; align-items:center; gap:3px; color:var(--gold); font-weight:700; }
 
+  /* ---------- VIDEO GRID (2-column) ---------- */
+  .video-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:20px 12px; padding:0 20px;
+  }
+  .video-card{ cursor:pointer; }
+  .video-thumb{
+    position:relative; width:100%; aspect-ratio:4/3; border-radius:10px; overflow:hidden;
+    background:linear-gradient(160deg,#3a3a4a,#26262f); margin-bottom:8px;
+  }
+  .video-thumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .video-badge-hd{
+    position:absolute; top:7px; right:7px; z-index:2; background:rgba(10,10,20,0.65); color:#fff;
+    font-size:10px; font-weight:800; letter-spacing:0.03em; padding:2px 7px; border-radius:4px;
+  }
+  .video-card-title{ font-size:14px; font-weight:700; line-height:1.35; color:var(--ink); margin:0; }
+  .video-skel{
+    aspect-ratio:4/3; border-radius:10px; background:linear-gradient(90deg,var(--skel-a,#e8e8ee),var(--skel-b,#f4f4f8),var(--skel-a,#e8e8ee));
+    background-size:200% 100%; animation:skel-shine 1.3s ease-in-out infinite;
+  }
+  @keyframes skel-shine{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
   /* full grid for search results */
   .full-grid{
     display:grid; grid-template-columns:repeat(auto-fill, minmax(135px,1fr)); gap:16px 14px; padding:0 20px;
@@ -710,12 +731,6 @@
     <div class="banner-slider-dots" id="bannerSliderDots"></div>
   </div>
 
-  <div class="filter-row" id="videoFilterRow">
-    <button class="filter-chip active" data-vfilter="all" onclick="setVideoFilter('all')">အားလုံး</button>
-    <button class="filter-chip" data-vfilter="free" onclick="setVideoFilter('free')">Free</button>
-    <button class="filter-chip" data-vfilter="vip" onclick="setVideoFilter('vip')">👑 VIP</button>
-  </div>
-
   <!-- Adsterra: Banner 320x50 -->
   <div style="display:flex; justify-content:center; margin:0 0 20px;">
     <script>
@@ -730,39 +745,21 @@
     <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"></script>
   </div>
 
-  <!-- Free Video rail -->
-  <div class="section" id="freeVideoSection">
+  <!-- Video grid -->
+  <div class="section" id="videoSection">
     <div class="section-head">
-      <h2>Free Video</h2>
-      <span class="view-all" onclick="setVideoFilter('free')">View all ›</span>
+      <h2>Video</h2>
     </div>
-    <div class="rail" id="freeVideoRail">
-      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    <div class="video-grid" id="videoGrid">
+      <div class="video-skel"></div><div class="video-skel"></div><div class="video-skel"></div><div class="video-skel"></div>
     </div>
+    <div class="empty" id="videoEmptyState" style="display:none;">Video မရှိသေးပါ</div>
   </div>
 
-  <!-- Adsterra: Native Banner (between rails) -->
-  <div style="margin:4px 20px 22px;">
+  <!-- Adsterra: Native Banner -->
+  <div style="margin:4px 20px 8px; max-height:100px; overflow:hidden;">
     <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"></script>
     <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
-  </div>
-
-  <!-- VIP Video rail -->
-  <div class="section" id="vipVideoSection">
-    <div class="section-head">
-      <h2>👑 VIP Video</h2>
-      <span class="view-all" onclick="setVideoFilter('vip')">View all ›</span>
-    </div>
-    <div class="rail" id="vipVideoRail">
-      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
-    </div>
-  </div>
-
-  <!-- Filtered results grid -->
-  <div class="section" id="videoResultsSection" style="display:none;">
-    <div class="section-head"><h2 id="videoResultsHeading">ရလဒ်များ</h2><span id="videoCount" style="font-size:12.5px; color:var(--muted);"></span></div>
-    <div class="full-grid" id="videoResultsGrid"></div>
-    <div class="empty" id="videoEmptyState" style="display:none;">ဒီအမျိုးအစားအတွက် Video မရှိသေးပါ။</div>
   </div>
 </div>
 
@@ -1022,7 +1019,6 @@ async function uploadScreenshotToImgbb(file) {
 let ALL_BOOKS = [];
 let CURRENT_FILTER = "all";
 let ALL_VIDEOS = [];
-let CURRENT_VIDEO_FILTER = "all";
 let VIDEOS_LOADED = false;
 let CURRENT_VIDEO = null;
 let TELEGRAM_LINK = TELEGRAM_LINK_FALLBACK;
@@ -1473,79 +1469,37 @@ async function loadVideos() {
       showToast("Video များ ဆွဲယူ၍ မရပါ");
     }
   } catch (e) {
-    document.getElementById("freeVideoRail").innerHTML = "";
-    document.getElementById("vipVideoRail").innerHTML = "";
+    document.getElementById("videoGrid").innerHTML = "";
     showToast("Supabase config ကို စစ်ပေးပါ");
   }
 }
 
-function setVideoFilter(f) {
-  CURRENT_VIDEO_FILTER = f;
-  document.querySelectorAll("#videoFilterRow .filter-chip").forEach(b => b.classList.toggle("active", b.dataset.vfilter === f));
-  renderVideos();
-}
-
 function videoCardHtml(v) {
-  const isVip = (v.Type || "free").toLowerCase() === "vip";
-  const isUnlocked = !isVip || USER_STATUS === "approved";
   const thumbContent = v.ThumbnailURL
     ? `<img src="${escapeHtml(v.ThumbnailURL)}" alt="">`
     : `<span class="fallback-title">${escapeHtml(v.Title || "")}</span>`;
   return `
-    <div class="book-card" onclick="openVideo('${v.VideoID}')">
-      <div class="book-cover" style="${!v.ThumbnailURL ? 'background:linear-gradient(160deg,#7d76e8,#4a3fd6);' : ''}">
+    <div class="video-card" onclick="openVideo('${v.VideoID}')">
+      <div class="video-thumb" style="${!v.ThumbnailURL ? 'background:linear-gradient(160deg,#7d76e8,#4a3fd6);' : ''}">
         ${thumbContent}
         <div class="video-play-badge">▶</div>
-        <span class="tag-pill ${isVip ? 'premium' : 'free'}">${isVip ? 'VIP' : 'Free'}</span>
-        ${isVip && !isUnlocked ? `<div class="lock-icon"><span>🔒</span></div>` : ''}
+        <span class="video-badge-hd">HD</span>
       </div>
-      <p class="book-title">${escapeHtml(v.Title || "အမည်မဲ့")}</p>
+      <p class="video-card-title">${escapeHtml(v.Title || "အမည်မဲ့")}</p>
     </div>`;
 }
 
 function renderVideos() {
-  const searching = CURRENT_VIDEO_FILTER !== "all";
-
-  const freeSection = document.getElementById("freeVideoSection");
-  const vipSection = document.getElementById("vipVideoSection");
-  const resultsSection = document.getElementById("videoResultsSection");
-
-  if (!searching) {
-    freeSection.style.display = "";
-    vipSection.style.display = "";
-    resultsSection.style.display = "none";
-
-    const freeVideos = ALL_VIDEOS.filter(v => (v.Type || "free").toLowerCase() === "free");
-    const vipVideos = ALL_VIDEOS.filter(v => (v.Type || "").toLowerCase() === "vip");
-
-    const RAIL_DISPLAY_CAP = 15;
-    document.getElementById("freeVideoRail").innerHTML = freeVideos.length
-      ? freeVideos.slice(0, RAIL_DISPLAY_CAP).map(videoCardHtml).join("")
-      : `<div class="empty" style="width:100%;">Free Video မရှိသေးပါ</div>`;
-    document.getElementById("vipVideoRail").innerHTML = vipVideos.length
-      ? vipVideos.slice(0, RAIL_DISPLAY_CAP).map(videoCardHtml).join("")
-      : `<div class="empty" style="width:100%;">VIP Video မရှိသေးပါ</div>`;
-    return;
-  }
-
-  freeSection.style.display = "none";
-  vipSection.style.display = "none";
-  resultsSection.style.display = "";
-
-  const list = ALL_VIDEOS.filter(v => CURRENT_VIDEO_FILTER === "all" || (v.Type || "free").toLowerCase() === CURRENT_VIDEO_FILTER);
-
-  document.getElementById("videoResultsHeading").textContent = CURRENT_VIDEO_FILTER === "vip" ? "VIP Video" : "Free Video";
-  document.getElementById("videoCount").textContent = list.length + " ခု";
-  const grid = document.getElementById("videoResultsGrid");
+  const grid = document.getElementById("videoGrid");
   const empty = document.getElementById("videoEmptyState");
 
-  if (list.length === 0) {
+  if (!ALL_VIDEOS.length) {
     grid.innerHTML = "";
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
-  grid.innerHTML = list.map(videoCardHtml).join("");
+  grid.innerHTML = ALL_VIDEOS.map(videoCardHtml).join("");
 }
 
 /* ---------------- VIDEO PLAYER MODAL ---------------- */
@@ -1561,22 +1515,13 @@ async function openVideo(id) {
     return;
   }
   CURRENT_VIDEO = data.video;
-  const isVip = (CURRENT_VIDEO.Type || "free").toLowerCase() === "vip";
-  const unlocked = !isVip || USER_STATUS === "approved";
 
-  if (!unlocked) {
-    renderVideoLockedView();
-    return;
-  }
+  try { window.open("https://www.effectivecpmnetwork.com/akqzxpt9?key=1c69af0ea01ddafa760c20cdf86d985f", "_blank"); } catch (e) { /* silent */ }
 
-  if (!isVip) {
-    try { window.open("https://www.effectivecpmnetwork.com/akqzxpt9?key=1c69af0ea01ddafa760c20cdf86d985f", "_blank"); } catch (e) { /* silent */ }
-  }
-
-  renderVideoPlayer();
+  renderInterstitialAd();
 }
 
-function renderVideoLockedView() {
+function renderInterstitialAd() {
   const modal = document.getElementById("videoModal");
   const v = CURRENT_VIDEO;
   modal.innerHTML = `
@@ -1584,15 +1529,40 @@ function renderVideoLockedView() {
       <div><h2>${escapeHtml(v.Title || "")}</h2></div>
       <button class="close-btn" onclick="closeVideo()">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="desc">${escapeHtml(v.Description || "")}</div>
-      <div class="lock-box">
-        <div class="icon">🔒</div>
-        <h3>ဒါက VIP Video ပါ</h3>
-        <p>ဒီ Video ကိုကြည့်ဖို့ အကောင့်ဝင်ပြီး Premium ဝင်ရပါမယ်။</p>
-        <button class="btn btn-primary" onclick="closeVideo(); goPage('profile');">အကောင့်ကြည့်မယ်</button>
+    <div class="modal-body" style="padding:20px;">
+      <div style="text-align:center; font-size:13px; color:var(--muted); margin-bottom:10px;">ကြော်ငြာအနည်းငယ်ကြာ ကြည့်ရှုပြီးမှ Video ကို ဆက်ကြည့်နိုင်ပါမည်</div>
+      <div style="display:flex; justify-content:center; margin:14px 0;">
+        <script>
+          atOptions = {
+            'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        <\/script>
+        <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"><\/script>
       </div>
+      <div style="margin:16px 20px;">
+        <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"><\/script>
+        <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
+      </div>
+      <button class="btn btn-primary" id="continueToVideoBtn" style="width:100%; margin-top:10px;" disabled>Video ကြည့်မယ် (5)</button>
     </div>`;
+
+  let seconds = 5;
+  const btn = document.getElementById("continueToVideoBtn");
+  const timer = setInterval(() => {
+    seconds--;
+    if (seconds <= 0) {
+      clearInterval(timer);
+      btn.disabled = false;
+      btn.textContent = "Video ကြည့်မယ် ▶";
+      btn.onclick = () => renderVideoPlayer();
+    } else {
+      btn.textContent = `Video ကြည့်မယ် (${seconds})`;
+    }
+  }, 1000);
 }
 
 function renderVideoPlayer() {
@@ -1606,6 +1576,18 @@ function renderVideoPlayer() {
     <div class="modal-body" style="padding:0;">
       <div class="video-player-wrap">
         <iframe src="${escapeHtml(v.VideoURL)}" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+      </div>
+      <div style="display:flex; justify-content:center; margin:14px 0;">
+        <script>
+          atOptions = {
+            'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        <\/script>
+        <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"><\/script>
       </div>
       <div class="desc" style="padding:16px 20px;">${escapeHtml(v.Description || "")}</div>
     </div>`;
