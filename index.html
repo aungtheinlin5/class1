@@ -1079,6 +1079,26 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
+/* Ad scripts inserted via innerHTML don't execute (browsers block <script> tags added
+   this way). Wrapping each ad in its own srcdoc iframe makes it a normal, always-executable
+   element, and also keeps document.write() calls contained to that iframe instead of wiping
+   the whole page. Use these helpers anywhere an ad needs to render inside JS-generated HTML. */
+function adBannerHTML(key, width, height) {
+  const doc = '<!DOCTYPE html><html><head><style>*{margin:0;padding:0;}body{overflow:hidden;background:transparent;}</style></head><body>'
+    + '<script>atOptions={"key":"' + key + '","format":"iframe","height":' + height + ',"width":' + width + ',"params":{}};<\/script>'
+    + '<script src="https://www.highperformanceformat.com/' + key + '/invoke.js"><\/script>'
+    + '</body></html>';
+  return `<iframe srcdoc="${escapeHtml(doc)}" width="${width}" height="${height}" style="border:none; max-width:100%;" scrolling="no" loading="lazy"></iframe>`;
+}
+
+function adNativeHTML() {
+  const doc = '<!DOCTYPE html><html><head><style>*{margin:0;padding:0;}body{background:transparent;}</style></head><body>'
+    + '<script async data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"><\/script>'
+    + '<div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>'
+    + '</body></html>';
+  return `<iframe srcdoc="${escapeHtml(doc)}" width="100%" height="100" style="border:none;" scrolling="no" loading="lazy"></iframe>`;
+}
+
 /* ---------------- DATA LAYER (Supabase) ----------------
    These wrap Supabase calls and return objects shaped the same way
    the old Apps Script API did (BookID, Title, ChapterNumber, etc.)
@@ -1492,32 +1512,14 @@ function videoCardHtml(v) {
 function videoAdCard300x250() {
   return `
     <div style="grid-column:1 / -1; display:flex; justify-content:center; margin:4px 0;">
-      <script>
-        atOptions = {
-          'key' : '1c526f76ccfda869b353f53f05191ba1',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
-          'params' : {}
-        };
-      <\/script>
-      <script src="https://www.highperformanceformat.com/1c526f76ccfda869b353f53f05191ba1/invoke.js"><\/script>
+      ${adBannerHTML('1c526f76ccfda869b353f53f05191ba1', 300, 250)}
     </div>`;
 }
 
 function videoAdCard468x60() {
   return `
     <div style="grid-column:1 / -1; display:flex; justify-content:center; margin:4px 0; overflow:hidden;">
-      <script>
-        atOptions = {
-          'key' : '658b2d8c3ba2a5d3ded6ddc04ab171f2',
-          'format' : 'iframe',
-          'height' : 60,
-          'width' : 468,
-          'params' : {}
-        };
-      <\/script>
-      <script src="https://www.highperformanceformat.com/658b2d8c3ba2a5d3ded6ddc04ab171f2/invoke.js"><\/script>
+      ${adBannerHTML('658b2d8c3ba2a5d3ded6ddc04ab171f2', 468, 60)}
     </div>`;
 }
 
@@ -1572,20 +1574,10 @@ function renderInterstitialAd() {
     <div class="modal-body" style="padding:20px;">
       <div style="text-align:center; font-size:13px; color:var(--muted); margin-bottom:10px;">ကြော်ငြာအနည်းငယ်ကြာ ကြည့်ရှုပြီးမှ Video ကို ဆက်ကြည့်နိုင်ပါမည်</div>
       <div style="display:flex; justify-content:center; margin:14px 0;">
-        <script>
-          atOptions = {
-            'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-        <\/script>
-        <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"><\/script>
+        ${adBannerHTML('cb501092e362be3ab4fdd29c1228d4b6', 320, 50)}
       </div>
       <div style="margin:16px 20px;">
-        <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"><\/script>
-        <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
+        ${adNativeHTML()}
       </div>
       <button class="btn btn-primary" id="continueToVideoBtn" style="width:100%; margin-top:10px;" disabled>Video ကြည့်မယ် (5)</button>
     </div>`;
@@ -1618,16 +1610,7 @@ function renderVideoPlayer() {
         <iframe src="${escapeHtml(v.VideoURL)}" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
       </div>
       <div style="display:flex; justify-content:center; margin:14px 0;">
-        <script>
-          atOptions = {
-            'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-        <\/script>
-        <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"><\/script>
+        ${adBannerHTML('cb501092e362be3ab4fdd29c1228d4b6', 320, 50)}
       </div>
       <div class="desc" style="padding:16px 20px;">${escapeHtml(v.Description || "")}</div>
     </div>`;
@@ -2605,16 +2588,7 @@ function twodLiveHtml() {
       </div>
 
       <div style="display:flex; justify-content:center; margin:14px 0;">
-        <script>
-          atOptions = {
-            'key' : 'cb501092e362be3ab4fdd29c1228d4b6',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-        <\/script>
-        <script src="https://www.highperformanceformat.com/cb501092e362be3ab4fdd29c1228d4b6/invoke.js"><\/script>
+        ${adBannerHTML('cb501092e362be3ab4fdd29c1228d4b6', 320, 50)}
       </div>
 
       <div class="countdown-section">
@@ -2623,8 +2597,7 @@ function twodLiveHtml() {
       </div>
 
       <div style="margin:14px 0;">
-        <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"><\/script>
-        <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
+        ${adNativeHTML()}
       </div>
     </div>
 
