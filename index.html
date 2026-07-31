@@ -1489,6 +1489,38 @@ function videoCardHtml(v) {
     </div>`;
 }
 
+function videoAdCard300x250() {
+  return `
+    <div style="grid-column:1 / -1; display:flex; justify-content:center; margin:4px 0;">
+      <script>
+        atOptions = {
+          'key' : '1c526f76ccfda869b353f53f05191ba1',
+          'format' : 'iframe',
+          'height' : 250,
+          'width' : 300,
+          'params' : {}
+        };
+      <\/script>
+      <script src="https://www.highperformanceformat.com/1c526f76ccfda869b353f53f05191ba1/invoke.js"><\/script>
+    </div>`;
+}
+
+function videoAdCard468x60() {
+  return `
+    <div style="grid-column:1 / -1; display:flex; justify-content:center; margin:4px 0; overflow:hidden;">
+      <script>
+        atOptions = {
+          'key' : '658b2d8c3ba2a5d3ded6ddc04ab171f2',
+          'format' : 'iframe',
+          'height' : 60,
+          'width' : 468,
+          'params' : {}
+        };
+      <\/script>
+      <script src="https://www.highperformanceformat.com/658b2d8c3ba2a5d3ded6ddc04ab171f2/invoke.js"><\/script>
+    </div>`;
+}
+
 function renderVideos() {
   const grid = document.getElementById("videoGrid");
   const empty = document.getElementById("videoEmptyState");
@@ -1499,7 +1531,15 @@ function renderVideos() {
     return;
   }
   empty.style.display = "none";
-  grid.innerHTML = ALL_VIDEOS.map(videoCardHtml).join("");
+  const html = [];
+  ALL_VIDEOS.forEach((v, i) => {
+    html.push(videoCardHtml(v));
+    if ((i + 1) % 6 === 0) {
+      html.push(videoAdCard300x250());
+      html.push(videoAdCard468x60());
+    }
+  });
+  grid.innerHTML = html.join("");
 }
 
 /* ---------------- VIDEO PLAYER MODAL ---------------- */
