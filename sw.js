@@ -29,3 +29,38 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
+/* ---------------- WEB PUSH NOTIFICATIONS ---------------- */
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) {
+    data = { title: "Notification", message: event.data ? event.data.text() : "" };
+  }
+
+  const title = data.title || "အသိပေးချက်";
+  const options = {
+    body: data.message || "",
+    icon: data.icon || "https://i.ibb.co/3m3rPzX4/download-1.jpg",
+    badge: data.icon || undefined,
+    vibrate: [200, 100, 200],
+    silent: false, // browser/OS ရဲ့ default notification sound ကို အသုံးပြုမယ်
+    tag: "site-notification",
+    renotify: true,
+    data: { url: data.url || "/" },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
