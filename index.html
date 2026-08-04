@@ -15,7 +15,6 @@
 <meta name="theme-color" content="#0f0f16">
 <meta name="supported-color-schemes" content="dark light">
 <meta name="darkreader-lock">
-  <meta name="juicyads-site-verification" content="9adc24185b639f5c0c77d6bb5f4d7e11">
 <meta http-equiv="x-color-scheme" content="dark light">
 <title>Dr.X Hub — Online Book Library</title>
 <meta name="description" content="Dr.X Hub — Video နှင့် Ebook များကို အွန်လိုင်းမှာ တိုက်ရိုက်ကြည့်ရှု၊ ဖတ်ရှုနိုင်သော Platform။">
@@ -754,6 +753,8 @@
 </style>
 </head>
 <body>
+<!-- JuicyAds loader (တစ်ခါတည်း load, ad zone တစ်ခုချင်းစီက အောက်မှာ ရှိပါတယ်) -->
+<script type="text/javascript" data-cfasync="false" async src="https://poweredby.jads.co/js/jads.js"></script>
 
 <div class="page-loading-bar" id="pageLoadingBar"><div class="bar"></div></div>
 
@@ -795,10 +796,10 @@
     <div class="empty" id="videoEmptyState" style="display:none;">Video မရှိသေးပါ</div>
   </div>
 
-  <!-- Adsterra: Native Banner -->
-  <div style="margin:4px 20px 8px; max-height:100px; overflow:hidden;">
-    <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"></script>
-    <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
+  <!-- JuicyAds -->
+  <div style="display:flex; justify-content:center; margin:4px 20px 8px;">
+    <ins id="1123685" data-width="308" data-height="286"></ins>
+    <script type="text/javascript" data-cfasync="false" async>(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1123685});</script>
   </div>
 </div>
 
@@ -869,10 +870,10 @@
     <div class="rail-loading-text" id="freeRailLoadingText"><div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> စာအုပ်များ ခေတ္တစောင့်ပါ...</div>
   </div>
 
-  <!-- Adsterra: Native Banner (between rails) -->
-  <div style="margin:4px 20px 22px;">
-    <script async="async" data-cfasync="false" src="https://pl30424237.effectivecpmnetwork.com/8bd93c86c4e4c635c55a73d36f0fa7d0/invoke.js"></script>
-    <div id="container-8bd93c86c4e4c635c55a73d36f0fa7d0"></div>
+  <!-- JuicyAds (between rails) -->
+  <div style="display:flex; justify-content:center; margin:4px 20px 22px;">
+    <ins id="1123683" data-width="158" data-height="168"></ins>
+    <script type="text/javascript" data-cfasync="false" async>(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1123683});</script>
   </div>
 
   <!-- Premium rail -->
@@ -2202,8 +2203,13 @@ async function trySetupWebPush(promptIfNeeded) {
 }
 
 // Permission ကို ခွင့်ပြုပြီးသားဆိုရင် (browser တစ်ခြားခေါက်ဝင်လာလည်း) ပြန် subscribe အောင်လုပ်ပေးမယ် — ဆိတ်ဆိတ်
-if ("serviceWorker" in navigator && "PushManager" in window && Notification.permission === "granted") {
-  trySetupWebPush(false);
+// Permission မေးရသေးဘူးဆိုရင်တော့ site ဝင်တာနဲ့ auto-prompt လုပ်ပေးမယ်
+if ("serviceWorker" in navigator && "PushManager" in window) {
+  if (Notification.permission === "granted") {
+    trySetupWebPush(false);
+  } else if (Notification.permission === "default") {
+    setTimeout(() => trySetupWebPush(true), 1500);
+  }
 }
 
 function openNotificationsModal() {
