@@ -40,7 +40,7 @@ self.addEventListener("push", (event) => {
   const title = data.title || "အသိပေးချက်";
   const options = {
     body: data.message || "",
-    icon: data.icon || "https://i.ibb.co/3m3rPzX4/download-1.jpg",
+    icon: data.icon || "https://i.ibb.co/TBXn2pSS/Screenshot-64.png",
     badge: data.icon || undefined,
     vibrate: [200, 100, 200],
     silent: false, // browser/OS ရဲ့ default notification sound ကို အသုံးပြုမယ်
